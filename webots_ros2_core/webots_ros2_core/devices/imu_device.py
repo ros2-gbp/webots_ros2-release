@@ -14,7 +14,7 @@
 
 """Webots Accelerometer, Gyro and InertialUnit devices wrapper for ROS2."""
 
-from rclpy.qos import qos_profile_sensor_data
+from rclpy.qos import QoSReliabilityPolicy, qos_profile_sensor_data
 from sensor_msgs.msg import Imu
 from webots_ros2_core.math.interpolation import interpolate_lookup_table
 from .sensor_device import SensorDevice
@@ -33,6 +33,7 @@ class ImuDevice(SensorDevice):
     - Combines readings from Accelerometer, Gyro and InertialUnit to ROS topic of type `sensor_msgs/Imu`
 
     Args:
+    ----
         node (WebotsNode): The ROS2 node.
         device_key (str): Unique identifier of the device used for configuration.
         wb_devices (array): Webots nodes in the following orderd, Accelerometer, Gyro and InertialUnit.
@@ -53,8 +54,11 @@ class ImuDevice(SensorDevice):
         # Create topics
         self._publisher = None
         if not self._disable:
+            qos_sensor_reliable = qos_profile_sensor_data
+            qos_sensor_reliable.reliability = QoSReliabilityPolicy.RELIABLE
+
             self._publisher = self._node.create_publisher(Imu, self._topic_name,
-                                                          qos_profile_sensor_data)
+                                                          qos_sensor_reliable)
 
     def __enable_imu(self):
         for wb_device in self._wb_device:

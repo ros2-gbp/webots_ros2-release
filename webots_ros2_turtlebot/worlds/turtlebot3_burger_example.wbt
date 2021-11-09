@@ -1,4 +1,4 @@
-#VRML_SIM R2021a utf8
+#VRML_SIM R2021b utf8
 WorldInfo {
   info [
     "Simple TurtleBot3 Burger simulation that can be controlled by a ROS."
@@ -27,6 +27,8 @@ TurtleBot3Burger_enu {
       name "inertial_unit"
     }
     RobotisLds01 {
+    }
+    GPS {
     }
   ]
 }
@@ -206,10 +208,6 @@ Table {
 DirectionPanel {
   translation 8 5 1.5
   rotation 1 0 0 1.571
-  textSize 0.175
-  text "Fresh beer :)"
-  right FALSE
-  left TRUE
 }
 BunchOfSunFlowers {
   translation 7.68 -0.52 0.5

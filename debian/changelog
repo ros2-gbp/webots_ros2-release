@@ -1,0 +1,20 @@
+ros-galactic-webots-ros2-tesla (1.2.0-2focal) focal; urgency=high
+
+  * Adapt the worlds to the new R2022a FLU convention.
+
+ -- Cyberbotics <support@cyberbotics.com>  Mon, 20 Dec 2021 23:00:00 -0000
+
+ros-galactic-webots-ros2-tesla (1.1.2-2focal) focal; urgency=high
+
+  * Utilize the 'webots_ros2_driver' instead of 'webots_ros2_core'.
+  * Added code compliance for 'ROS Foxy'.
+
+ -- Cyberbotics <support@cyberbotics.com>  Tue, 02 Nov 2021 23:00:00 -0000
+
+ros-galactic-webots-ros2-tesla (1.0.6-2focal) focal; urgency=high
+
+  * Initial version
+
+ -- Cyberbotics <support@cyberbotics.com>  Fri, 09 Apr 2021 22:00:00 -0000
+
+

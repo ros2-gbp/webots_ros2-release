@@ -1,0 +1,14 @@
+ros-foxy-webots-ros2-tests (1.2.0-2focal) focal; urgency=high
+
+  * Adapt the worlds to the new R2022a FLU convention.
+  * Add a system test for the TurtleBot3 Navigation scenario.
+
+ -- Cyberbotics <support@cyberbotics.com>  Mon, 20 Dec 2021 23:00:00 -0000
+
+ros-foxy-webots-ros2-tests (1.1.2-2focal) focal; urgency=high
+
+  * Initial version.
+
+ -- Cyberbotics <support@cyberbotics.com>  Tue, 02 Nov 2021 23:00:00 -0000
+
+

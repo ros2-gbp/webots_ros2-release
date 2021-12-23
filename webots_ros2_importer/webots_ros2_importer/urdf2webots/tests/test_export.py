@@ -8,23 +8,13 @@ testDirectory = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 sourceDirectory = os.path.join(testDirectory, 'sources')
 resultDirectory = os.path.join(testDirectory, 'results')
 expectedDirectory = os.path.join(testDirectory, 'expected')
-urdf2webotsPath = os.path.abspath(os.path.join(testDirectory, '..', 'demo.py'))
+urdf2webotsPath = os.path.abspath(os.path.join(testDirectory, '..', 'urdf2webots/importer.py'))
 
 modelPaths = [
     {
         'input': os.path.join(sourceDirectory, 'motoman/motoman_sia20d_support/urdf/sia20d.urdf'),
         'output': os.path.join(resultDirectory, 'MotomanSia20d.proto'),
-        'expected': [
-            os.path.join(expectedDirectory, 'MotomanSia20d.proto'),
-            os.path.join(expectedDirectory, 'MotomanSia20d_meshes', 'MotomanSia20d_MOTOMAN_AXIS_BMesh.proto'),
-            os.path.join(expectedDirectory, 'MotomanSia20d_meshes', 'MotomanSia20d_MOTOMAN_AXIS_EMesh.proto'),
-            os.path.join(expectedDirectory, 'MotomanSia20d_meshes', 'MotomanSia20d_MOTOMAN_AXIS_LMesh.proto'),
-            os.path.join(expectedDirectory, 'MotomanSia20d_meshes', 'MotomanSia20d_MOTOMAN_AXIS_RMesh.proto'),
-            os.path.join(expectedDirectory, 'MotomanSia20d_meshes', 'MotomanSia20d_MOTOMAN_AXIS_SMesh.proto'),
-            os.path.join(expectedDirectory, 'MotomanSia20d_meshes', 'MotomanSia20d_MOTOMAN_AXIS_TMesh.proto'),
-            os.path.join(expectedDirectory, 'MotomanSia20d_meshes', 'MotomanSia20d_MOTOMAN_AXIS_UMesh.proto'),
-            os.path.join(expectedDirectory, 'MotomanSia20d_meshes', 'MotomanSia20d_MOTOMAN_BASEMesh.proto'),
-        ],
+        'expected': [os.path.join(expectedDirectory, 'MotomanSia20d.proto')],
         'arguments': '--multi-file --static-base --tool-slot=tool0 --rotation="1 0 0 0" --init-pos="[0.1, -0.1, 0.2]"'
     },
     {
@@ -32,6 +22,12 @@ modelPaths = [
         'output': os.path.join(resultDirectory, 'Human.proto'),
         'expected': [os.path.join(expectedDirectory, 'Human.proto')],
         'arguments': ''
+    },
+    {
+        'input': os.path.join(sourceDirectory, 'kuka_lbr_iiwa_support/urdf/model.urdf'),
+        'output': os.path.join(resultDirectory, 'KukaLbrIiwa14R820.proto'),
+        'expected': [os.path.join(expectedDirectory, 'KukaLbrIiwa14R820.proto')],
+        'arguments': '--box-collision --static-base --tool-slot=tool0 --rotation="1 0 0 -1.5708"'
     }
 ]
 
@@ -39,11 +35,20 @@ modelPaths = [
 def fileCompare(file1, file2):
     """Compare content of two files."""
     with open(file1) as f1, open(file2) as f2:
-        for line1, line2 in zip(f1, f2):
+        for i, (line1, line2) in enumerate(zip(f1, f2)):
             if line1.startswith('# Extracted from:') and line2.startswith('# Extracted from:'):
                 # This line may differ.
                 continue
+            elif line1.startswith('#VRML_SIM') and line2.startswith('#VRML_SIM'):
+                # This line may differ according to Webots version used
+                continue
+            elif 'CI' not in os.environ and '/home/runner/work/' in line2:
+                # When testing locally, the paths may differ.
+                continue
             elif line1 != line2:
+                # Prints the difference between result and expected line
+                print('Diff (line ' + str(i) + ') in ' + file1)
+                print('result: ' + line1 + 'expect: ' + line2)
                 return False
     return True
 

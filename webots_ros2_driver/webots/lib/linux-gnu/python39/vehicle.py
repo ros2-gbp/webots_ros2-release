@@ -314,6 +314,12 @@ class Car(Driver):
     def getWheelSpeed(self, wheel):
         return _vehicle.Car_getWheelSpeed(self, wheel)
 
+    def setLeftSteeringAngle(self, angle):
+        return _vehicle.Car_setLeftSteeringAngle(self, angle)
+
+    def setRightSteeringAngle(self, angle):
+        return _vehicle.Car_setRightSteeringAngle(self, angle)
+
     def getRightSteeringAngle(self):
         return _vehicle.Car_getRightSteeringAngle(self)
 

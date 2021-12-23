@@ -1,53 +1,42 @@
 """webots_ros2 package setup file."""
 
-import os
-import fnmatch
-
 from setuptools import setup
 
-package_name = 'webots_ros2_universal_robot'
-worlds = [
-    'worlds/universal_robot_multiple.wbt',
-    'worlds/universal_robot_rviz.wbt',
-    'worlds/universal_robot.wbt',
-    'worlds/universal_robot_lidar.wbt',
-    'worlds/.universal_robot_multiple.wbproj',
-    'worlds/.universal_robot_rviz.wbproj',
-    'worlds/.universal_robot.wbproj',
-    'worlds/.universal_robot_lidar.wbproj'
-]
-launchers = [
-    'launch/universal_robot.launch.py',
-    'launch/universal_robot_multiple.launch.py',
-    'launch/universal_robot_rviz.launch.py',
-    'launch/universal_robot_rviz_dynamic.launch.py',
-    'launch/universal_robot_moveit2.launch.py',
-    'launch/universal_robot_moveit2.rviz'
-]
-config = [
-    'config/controllers.yaml',
-    'config/ur5e.srdf',
-    'config/kinematics.yaml'
-]
-textures = []
-for rootPath, dirNames, fileNames in os.walk('worlds/textures'):
-    for fileName in fnmatch.filter(fileNames, '*.jpg'):
-        filePath = os.path.relpath(os.path.join(rootPath, fileName))
-        textures.append(filePath)
 
-data_files = []
-data_files.append(('share/ament_index/resource_index/packages', ['resource/' + package_name]))
-data_files.append(('share/' + package_name + '/launch', launchers))
-data_files.append(('share/' + package_name + '/config', config))
-data_files.append(('share/' + package_name + '/worlds', worlds))
-data_files.append(('share/' + package_name + '/worlds/textures', textures))
-data_files.append(('share/' + package_name, ['package.xml']))
-data_files.append(('share/' + package_name + '/resource', ['resource/view_robot_dynamic.rviz']))
+package_name = 'webots_ros2_universal_robot'
+data_files = [
+    ('share/' + package_name + '/worlds', [
+        'worlds/universal_robot.wbt',
+        'worlds/.universal_robot.wbproj',
+        'worlds/armed_robots.wbt',
+        'worlds/.armed_robots.wbproj'
+    ]),
+    ('share/' + package_name + '/resource', [
+        'resource/view_robot_dynamic.rviz',
+        'resource/webots_ur5e_description.urdf',
+        'resource/ros2_control_config.yaml',
+        'resource/moveit_ur5e_description.urdf',
+        'resource/moveit_controllers.yaml',
+        'resource/moveit_ur5e.srdf',
+        'resource/moveit_kinematics.yaml',
+        'resource/moveit_movegroup.yaml',
+        'resource/moveit_visualization.rviz',
+        'resource/ros2_control_abb_config.yaml',
+        'resource/webots_abb_description.urdf'
+    ]),
+    ('share/' + package_name + '/launch', [
+        'launch/robot_launch.py',
+        'launch/multirobot_launch.py',
+        'launch/moveit_demo_launch.py',
+    ]),
+    ('share/' + package_name, ['package.xml']),
+    ('share/ament_index/resource_index/packages', ['resource/' + package_name])
+]
 
 setup(
     name=package_name,
-    version='1.0.6',
-    packages=[],
+    version='1.2.0',
+    packages=['webots_ros2_universal_robot'],
     data_files=data_files,
     install_requires=['setuptools', 'launch'],
     zip_safe=True,
@@ -66,6 +55,10 @@ setup(
     license='Apache License, Version 2.0',
     tests_require=['pytest'],
     entry_points={
-        'launch.frontend.launch_extension': ['launch_ros = launch_ros']
+        'launch.frontend.launch_extension': ['launch_ros = launch_ros'],
+        'console_scripts': [
+            'ur5e_controller = webots_ros2_universal_robot.ur5e_controller:main',
+            'abb_controller = webots_ros2_universal_robot.abb_controller:main'
+        ]
     }
 )

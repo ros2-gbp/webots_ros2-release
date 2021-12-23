@@ -1,6 +1,7 @@
 # urdf2webots
 
-[![Build Status](https://travis-ci.com/cyberbotics/urdf2webots.svg?branch=master)](https://travis-ci.com/cyberbotics/urdf2webots)
+![Test Status](https://github.com/cyberbotics/urdf2webots/actions/workflows/test.yml/badge.svg)
+[![PyPI version](https://badge.fury.io/py/urdf2webots.svg)](https://badge.fury.io/py/urdf2webots)
 
 This tool converts URDF files into Webots PROTO files.
 
@@ -17,9 +18,8 @@ On macOS, export the pip binary path to the PATH: `export PATH="/Users/$USER/Lib
 ### From Sources
 
 ```
-git clone https://github.com/cyberbotics/urdf2webots.git
-cd urdf2webots
-pip install -r requirements.txt
+git clone --recurse-submodules https://github.com/cyberbotics/urdf2webots.git
+pip install --upgrade --editable urdf2webots
 ```
 
 ## Usage
@@ -27,13 +27,7 @@ pip install -r requirements.txt
 ### From pip
 
 ```
-python -m urdf2webots.importer --input=someRobot.urdf [--output=outputFile] [--box-collision] [--normal] [--disable-mesh-optimization] [--multi-file] [--static-base] [--tool-slot=linkName] [--name-to-def] [--help]
-```
-
-### From Sources
-
-```
-python demo.py --input=someRobot.urdf [--output=outputFile] [--box-collision] [--normal] [--disable-mesh-optimization] [--multi-file] [--static-base] [--tool-slot=linkName] [--name-to-def] [--help]
+python -m urdf2webots.importer --input=someRobot.urdf [--output=outputFile] [--box-collision] [--normal] [--static-base] [--tool-slot=linkName] [--name-to-def] [--help]
 ```
 
 ### Arguments
@@ -44,8 +38,6 @@ The script accepts the following arguments:
   - **--output=OUTFILE**: If set, specifies the path and, if ending in ".proto", name of the resulting PROTO file. The filename minus the .proto extension will be the robot name.
   - **--normal**: If set, the normals are exported if present in the URDF definition.
   - **--box-collision**: If set, the bounding objects are approximated using boxes.
-  - **--disable-mesh-optimization**: If set, the duplicated vertices are not removed from the meshes (this can speed up a lot the conversion).
-  - **--multi-file**: If set, the mesh files are exported as separated PROTO files.
   - **--static-base**: If set, the base link will have the option to be static (disable physics)
   - **--tool-slot=LinkName**: Specify the link that you want to add a tool slot to (exact link name from urdf).
   - **--rotation="0 1 0 0"**: Set the rotation field of your PROTO file. If your URDF file uses the z-axis as 'up', use `--rotation="1 0 0 -1.5708"`.
@@ -68,7 +60,7 @@ Check out [this tutorial](./docs/tutorial.md) for a more in-depth, step by step 
 
 
 ## Notes
-This tool have been tested using Webots R2020b on Ubuntu16.04 and Windows.  
+This tool have been tested using Webots R2022a on Ubuntu20.04 and Windows.  
 You can find the sources of these URDF files here:  
   - universal robot: https://github.com/ros-industrial/universal_robot/tree/kinetic-devel/ur_description  
   - pr2 robot: https://github.com/PR2/pr2_common/tree/kinetic-devel/pr2_description  

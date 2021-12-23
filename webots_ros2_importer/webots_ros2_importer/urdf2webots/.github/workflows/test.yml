@@ -8,7 +8,7 @@ jobs:
   tests:
     strategy:
       matrix:
-        python: [2.7, 3.5, 3.6, 3.7, 3.8]
+        python: [3.5, 3.6, 3.7, 3.8]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -20,6 +20,6 @@ jobs:
         python-version: ${{ matrix.python }}
     - name: Test
       run: |
-        pip install -r requirements.txt
+        pip install --upgrade --editable .
         pip install -r tests/requirements.txt
         python -m unittest discover -s tests

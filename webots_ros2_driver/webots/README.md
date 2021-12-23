@@ -1,4 +1,4 @@
-# webots-controller
+# webots-libcontroller
 
 > Notice: The library is automatically updated with the CI jobs running in [the main webots repository](https://github.com/cyberbotics/webots).
 > Any change made in this repository will be automatically overridden by the CI jobs.

@@ -28,8 +28,10 @@ counter = 0
 
 # to pass from external
 robotName = ''
-disableMeshOptimization = False
+extensionListSingleAppearance = ['.stl', '.obj']
 
+
+disableMeshOptimization = False
 
 class Trimesh():
     """Define triangular mesh object."""
@@ -43,14 +45,13 @@ class Trimesh():
         self.normal = []  # list of normals
         self.normalIndex = []  # list of index of normals
 
-
 class Inertia():
     """Define inertia object."""
 
     def __init__(self):
         """Initializatization."""
         self.position = [0.0, 0.0, 0.0]
-        self.rotation = [1.0, 0.0, 0.0, 0.0]
+        self.rotation = [0.0, 0.0, 1.0, 0.0]
         self.mass = None
         self.ixx = 1.0
         self.ixy = 0.0
@@ -87,6 +88,14 @@ class Sphere():
         self.radius = 0.0
 
 
+class Mesh():
+    """Define mesh object."""
+
+    def __init__(self):
+        """Initializatization."""
+        self.url = ''
+
+
 class Geometry():
     """Define geometry object."""
 
@@ -98,6 +107,7 @@ class Geometry():
         self.cylinder = Cylinder()
         self.sphere = Sphere()
         self.trimesh = Trimesh()
+        self.mesh = Mesh()
         self.scale = [1.0, 1.0, 1.0]
         self.name = None
         self.defName = None
@@ -155,7 +165,7 @@ class Visual():
     def __init__(self):
         """Initializatization."""
         self.position = [0.0, 0.0, 0.0]
-        self.rotation = [1.0, 0.0, 0.0, 0.0]
+        self.rotation = [0.0, 0.0, 1.0, 0.0]
         self.geometry = Geometry()
         self.material = Material()
 
@@ -166,7 +176,7 @@ class Collision():
     def __init__(self):
         """Initializatization."""
         self.position = [0.0, 0.0, 0.0]
-        self.rotation = [1.0, 0.0, 0.0, 0.0]
+        self.rotation = [0.0, 0.0, 1.0, 0.0]
         self.geometry = Geometry()
 
 
@@ -230,7 +240,7 @@ class Joint():
         self.name = 'default'
         self.type = 'default'
         self.position = [0.0, 0.0, 0.0]
-        self.rotation = [1.0, 0.0, 0.0, 0.0]
+        self.rotation = [0.0, 0.0, 1.0, 0.0]
         self.parent = 'default'
         self.child = 'default'
         self.axis = []
@@ -347,7 +357,6 @@ class Camera():
         indent = '  '
         file.write(indentationLevel * indent + 'Camera {\n')
         # rotation to convert from REP103 to webots viewport
-        file.write(indentationLevel * indent + '  rotation 1.0 0.0 0.0 3.141591\n')
         file.write(indentationLevel * indent + '  name "%s"\n' % self.name)
         if self.fov:
             file.write(indentationLevel * indent + '  fieldOfView %lf\n' % self.fov)
@@ -378,7 +387,7 @@ class Lidar():
         self.noise = None
 
     def export(self, file, indentationLevel):
-        """Export this camera."""
+        """Export this lidar."""
         indent = '  '
         file.write(indentationLevel * indent + 'Lidar {\n')
         file.write(indentationLevel * indent + '  name "%s"\n' % self.name)
@@ -433,125 +442,6 @@ def hasElement(node, element):
         return True
     else:
         return False
-
-
-def getSTLMesh(filename, node):
-    """Read stl file."""
-    print('Parsing Mesh: ' + filename)
-    stlFile = open(filename, 'rb')
-    stlFile.read(80)
-    numTriangles = struct.unpack("@i", stlFile.read(4))[0]
-    struct.unpack("<3f", stlFile.read(12))
-    a = struct.unpack("<3f", stlFile.read(12))
-    b = struct.unpack("<3f", stlFile.read(12))
-    c = struct.unpack("<3f", stlFile.read(12))
-    struct.unpack("H", stlFile.read(2))
-    trimesh = node.geometry.trimesh
-    trimesh.coord.append(a)
-    trimesh.coord.append(b)
-    trimesh.coord.append(c)
-    if numTriangles > 50000 and not disableMeshOptimization:
-        print('Warning: This mesh has a lot of triangles!')
-        print('Warning: It is recommended to use the script with the \'--disable-mesh-optimization\' argument.')
-    for i in range(1, numTriangles):
-        if i % 100 == 0:
-            sys.stdout.write('%d / %d\r' % (i, numTriangles))
-        struct.unpack("<3f", stlFile.read(12))
-        a = struct.unpack("<3f", stlFile.read(12))
-        indexA = None
-        if disableMeshOptimization or a not in trimesh.coord:
-            indexA = len(trimesh.coord)
-            trimesh.coord.append(a)
-        b = struct.unpack("<3f", stlFile.read(12))
-        indexB = None
-        if disableMeshOptimization or b not in trimesh.coord:
-            indexB = len(trimesh.coord)
-            trimesh.coord.append(b)
-        c = struct.unpack("<3f", stlFile.read(12))
-        indexC = None
-        if disableMeshOptimization or c not in trimesh.coord:
-            indexC = len(trimesh.coord)
-            trimesh.coord.append(c)
-        struct.unpack("H", stlFile.read(2))
-        trimesh.coordIndex.append([indexA if indexA is not None else trimesh.coord.index(a),
-                                   indexB if indexB is not None else trimesh.coord.index(b),
-                                   indexC if indexC is not None else trimesh.coord.index(c)])
-    stlFile.close()
-    return node
-
-
-def getOBJMesh(filename, node, link):
-    """read obj file."""
-    print('Parsing Mesh: ' + filename)
-    if hasattr(node, 'material') and node.material:
-        isVisual = True
-    else:
-        isVisual = False
-
-    with open(filename, 'r') as file:
-        counter = 0
-        indexOffset = 0
-        collision = None
-        for line in file:
-            header, body = line.split(' ', 1)
-            if header == '#':
-                continue
-            elif header == 'o':
-                if counter != 0:
-                    if isVisual:
-                        link.visual.append(collision)
-                    else:
-                        link.collision.append(collision)
-                    indexOffset += len(collision.geometry.trimesh.coord)
-                if isVisual:
-                    collision = Visual()
-                    collision.material = node.material
-                else:
-                    collision = Collision()
-                collision.position = node.position
-                collision.rotation = node.rotation
-                collision.geometry.scale = node.geometry.scale
-                extSring = '_%d' % (counter) if counter != 0 else ''
-                collision.geometry.name = '%s%s' % (os.path.splitext(os.path.basename(filename))[0], extSring)
-                counter += 1
-            elif header == 'f':  # face
-                vertices = body.split()
-                coordIndex = []
-                texCoordIndex = []
-                normalIndex = []
-                for vertex in vertices:
-                    indices = vertex.split('/')
-                    coordIndex.append(int(indices[0]) - indexOffset - 1)  # vertex coordinates
-                    length = len(indices)
-                    if length > 1 and indices[1]:  # texture coordinates
-                        texCoordIndex.append(int(indices[1]) - indexOffset - 1)
-                    if length > 2 and indices[2]:  # normal coordinates
-                        normalIndex.append(int(indices[2]) - indexOffset - 1)
-                collision.geometry.trimesh.coordIndex.append(coordIndex)
-                if texCoordIndex:
-                    collision.geometry.trimesh.texCoordIndex.append(texCoordIndex)
-                if normalIndex:
-                    collision.geometry.trimesh.normalIndex.append(normalIndex)
-            elif header == 'l':  # line, ignored
-                continue
-            elif header == 'v':  # vertex
-                x, y, z = body.split()
-                collision.geometry.trimesh.coord.append([float(x), float(y), float(z)])
-            elif header == 'vn':  # normals
-                x, y, z = body.split()
-                collision.geometry.trimesh.normal.append([float(x), float(y), float(z)])
-            elif header == 'vp':  # parameters, ignored
-                continue
-            elif header == 'vt':  # texture coordinate
-                texCoord = body.split()
-                if len(texCoord) < 1:  # v argument is optional and defaults to 0
-                    texCoord.append('0')
-                collision.geometry.trimesh.texCoord.append([float(texCoord[0]), float(texCoord[1])])
-                continue
-        if isVisual:
-            link.visual.append(collision)
-        else:
-            link.collision.append(collision)
 
 
 def getColladaMesh(filename, node, link):
@@ -794,20 +684,17 @@ def getVisual(link, node, path):
                 visual.geometry.scale[1] = float(meshScale[1])
                 visual.geometry.scale[2] = float(meshScale[2])
             extension = os.path.splitext(meshfile)[1].lower()
-            if extension == '.dae':
-                getColladaMesh(meshfile, visual, link)
-            elif extension == '.obj':
-                getOBJMesh(meshfile, visual, link)
-            elif extension == '.stl':
+            if extension in extensionListSingleAppearance:
                 name = os.path.splitext(os.path.basename(meshfile))[0]
                 if name in Geometry.reference:
                     visual.geometry = Geometry.reference[name]
                 else:
-                    if extension == '.stl':
-                        visual = getSTLMesh(meshfile, visual)
+                    visual.geometry.mesh.url = '"' + meshfile + '"'
                     visual.geometry.name = name
                     Geometry.reference[name] = visual.geometry
                 link.visual.append(visual)
+            elif extension == '.dae':
+                getColladaMesh(meshfile, visual, link)
             else:
                 print('Unsupported mesh format: \"' + extension + '\"')
 
@@ -856,20 +743,17 @@ def getCollision(link, node, path):
                 idx0 = meshfile.find('package://')
                 meshfile = meshfile[idx0 + len('package://'):]
             extension = os.path.splitext(meshfile)[1].lower()
-            if extension == '.dae':
-                getColladaMesh(meshfile, collision, link)
-            elif extension == '.obj':
-                getOBJMesh(meshfile, collision, link)
-            elif extension == '.stl':
+            if extension in extensionListSingleAppearance:
                 name = os.path.splitext(os.path.basename(meshfile))[0]
                 if name in Geometry.reference:
                     collision.geometry = Geometry.reference[name]
                 else:
-                    if extension == '.stl':
-                        collision.geometry.stl = getSTLMesh(meshfile, collision)
+                    collision.geometry.mesh.url = '"' + meshfile + '"'
                     collision.geometry.name = name
                     Geometry.reference[name] = collision.geometry
                 link.collision.append(collision)
+            elif extension == '.dae':
+                getColladaMesh(meshfile, collision, link)
             else:
                 print('Unsupported mesh format for collision: \"' + extension + '\"')
 

@@ -1,7 +1,6 @@
 """webots_ros2_epuck package setup file."""
 
 from setuptools import setup
-from glob import glob
 
 
 package_name = 'webots_ros2_epuck'
@@ -9,7 +8,7 @@ data_files = []
 data_files.append(('share/ament_index/resource_index/packages', [
     'resource/' + package_name
 ]))
-data_files.append(('share/' + package_name, [
+data_files.append(('share/' + package_name + '/launch', [
     'launch/robot_launch.py',
     'launch/robot_tools_launch.py',
     'launch/robot_with_tools_launch.py',
@@ -23,13 +22,9 @@ data_files.append(('share/' + package_name + '/worlds', [
     'worlds/.rats_life_benchmark.wbproj'
 ]))
 data_files.append(('share/' + package_name + '/protos', [
-    'protos/E-puck_enu.proto',
-    'protos/E-puckDistanceSensor_enu.proto',
     'protos/LegoTallInterval.proto',
     'protos/LegoTallWall.proto'
 ]))
-data_files.append(('share/' + package_name + '/protos/icons', glob('protos/icons/*')))
-data_files.append(('share/' + package_name + '/protos/textures', glob('protos/textures/*')))
 data_files.append(('share/' + package_name + '/resource', [
     'resource/all.rviz',
     'resource/nav2_params.yaml',
@@ -37,7 +32,9 @@ data_files.append(('share/' + package_name + '/resource', [
     'resource/map_rats_life.yaml',
     'resource/nav2_rats_life_waypoints.yaml',
     'resource/epuck_world_map.pgm',
-    'resource/epuck_world_map.yaml'
+    'resource/epuck_world_map.yaml',
+    'resource/epuck_webots.urdf',
+    'resource/ros2_control.yml',
 ]))
 data_files.append(('share/' + package_name, [
     'package.xml'
@@ -46,7 +43,7 @@ data_files.append(('share/' + package_name, [
 
 setup(
     name=package_name,
-    version='1.0.6',
+    version='1.2.0',
     packages=[package_name],
     data_files=data_files,
     install_requires=['setuptools', 'launch'],
@@ -67,7 +64,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'driver = webots_ros2_epuck.driver:main',
+            'epuck_node = webots_ros2_epuck.epuck_node:main',
             'drive_calibrator = webots_ros2_epuck.drive_calibrator:main',
             'simple_mapper = webots_ros2_epuck.simple_mapper:main'
         ],

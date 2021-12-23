@@ -7,12 +7,13 @@ from urdf2webots.math_utils import rotateVector, matrixFromRotation, multiplyMat
 
 toolSlot = None
 staticBase = False
-enableMultiFile = False
-meshFilesPath = None
 robotNameMain = ''
 initPos = None
 linkToDef = False
 jointToDef = False
+
+enableMultiFile = False
+meshFilesPath = None
 
 
 class RGB():
@@ -42,7 +43,7 @@ def header(proto, srcFile=None, robotName='', tags=[]):
     """Specify VRML file header."""
     if srcFile:
         header.sourceFile = srcFile
-    proto.write('#VRML_SIM R2021b utf8\n')
+    proto.write('#VRML_SIM R2022a utf8\n')
     proto.write('# license: Apache License 2.0\n')
     proto.write('# license url: http://www.apache.org/licenses/LICENSE-2.0\n')
     if tags:
@@ -80,7 +81,7 @@ def declaration(proto, robotName, initRotation):
 
 
 def URDFLink(proto, link, level, parentList, childList, linkList, jointList, sensorList,
-             jointPosition=[0.0, 0.0, 0.0], jointRotation=[1.0, 0.0, 0.0, 0.0],
+             jointPosition=[0.0, 0.0, 0.0], jointRotation=[0.0, 0.0, 1.0, 0.0],
              boxCollision=False, normal=False, dummy=False, robot=False, endpoint=False):
     """Write a link iteratively."""
     indent = '  '
@@ -148,7 +149,7 @@ def URDFLink(proto, link, level, parentList, childList, linkList, jointList, sen
         elif haveChild:
             proto.write((level + 1) * indent + ']\n')
         if level == 1:
-            proto.write((level + 1) * indent + 'name IS name \n')
+            proto.write((level + 1) * indent + 'name IS name\n')
         else:
             proto.write((level + 1) * indent + 'name "' + link.name + '"\n')
 
@@ -314,6 +315,20 @@ def URDFBoundingObject(proto, link, level, boxCollision):
                 proto.write('\n' + (boundingLevel + 1) * indent + ']\n')
                 proto.write(boundingLevel * indent + '}\n')
 
+        elif boundingObject.geometry.mesh.url:
+            if boundingObject.geometry.defName is not None:
+                proto.write(initialIndent + 'USE %s\n' % boundingObject.geometry.defName)
+            else:
+                if boundingObject.geometry.name is not None:
+                    boundingObject.geometry.defName = computeDefName(boundingObject.geometry.name)
+                if boundingObject.geometry.defName is not None:
+                    proto.write(initialIndent + 'DEF %s Mesh {\n' % boundingObject.geometry.defName)
+                else:
+                    proto.write(initialIndent + 'Mesh {\n')
+
+                proto.write((boundingLevel + 1) * indent + 'url ' + str(boundingObject.geometry.mesh.url) + '\n')
+                proto.write(boundingLevel * indent + '}\n')
+
         else:
             proto.write(initialIndent + 'Box{\n')
             proto.write((boundingLevel + 1) * indent + ' size 0.01 0.01 0.01\n')
@@ -347,36 +362,64 @@ def URDFVisual(proto, visualNode, level, normal=False):
     else:
         if visualNode.material.name is not None:
             visualNode.material.defName = computeDefName(visualNode.material.name)
-        if visualNode.material.defName is not None:
-            proto.write((shapeLevel + 1) * indent + 'appearance DEF %s PBRAppearance {\n' % visualNode.material.defName)
-        else:
-            proto.write((shapeLevel + 1) * indent + 'appearance PBRAppearance {\n')
-        ambientColor = RGBA2RGB(visualNode.material.ambient)
-        diffuseColor = RGBA2RGB(visualNode.material.diffuse, RGB_background=ambientColor)
-        emissiveColor = RGBA2RGB(visualNode.material.emission, RGB_background=ambientColor)
-        roughness = 1.0 - visualNode.material.specular.alpha * (visualNode.material.specular.red +
-                                                                visualNode.material.specular.green +
-                                                                visualNode.material.specular.blue) / 3.0
-        if visualNode.material.shininess:
-            roughness *= (1.0 - 0.5 * visualNode.material.shininess)
-        proto.write((shapeLevel + 2) * indent + 'baseColor %lf %lf %lf\n' % (diffuseColor.red,
-                                                                             diffuseColor.green,
-                                                                             diffuseColor.blue))
-        proto.write((shapeLevel + 2) * indent + 'transparency %lf\n' % (1.0 - visualNode.material.diffuse.alpha))
-        proto.write((shapeLevel + 2) * indent + 'roughness %lf\n' % roughness)
-        proto.write((shapeLevel + 2) * indent + 'metalness 0\n')
-        proto.write((shapeLevel + 2) * indent + 'emissiveColor %lf %lf %lf\n' % (emissiveColor.red,
-                                                                                 emissiveColor.green,
-                                                                                 emissiveColor.blue))
-        if visualNode.material.texture != "":
-            proto.write((shapeLevel + 2) * indent + 'baseColorMap ImageTexture {\n')
-            proto.write((shapeLevel + 3) * indent + 'url [ "' + visualNode.material.texture + '" ]\n')
-            proto.write((shapeLevel + 2) * indent + '}\n')
+        if visualNode.geometry.lineset:
+            if visualNode.material.defName is not None:
+                proto.write((shapeLevel + 1) * indent + 'appearance DEF %s Appearance {\n' % visualNode.material.defName)
+            else:
+                proto.write((shapeLevel + 1) * indent + 'appearance Appearance {\n')
 
-            proto.write((shapeLevel + 2) * indent + 'textureTransform TextureTransform {\n')
-            proto.write((shapeLevel + 3) * indent + 'scale 1 -1\n')
+            proto.write((shapeLevel + 2) * indent + 'material Material {\n')
+
+            ambientColor = RGBA2RGB(visualNode.material.ambient)
+            diffuseColor = RGBA2RGB(visualNode.material.diffuse, RGB_background=ambientColor)
+            emissiveColor = RGBA2RGB(visualNode.material.emission, RGB_background=ambientColor)
+            specularColor = RGBA2RGB(visualNode.material.specular, RGB_background=ambientColor)
+
+            proto.write((shapeLevel + 3) * indent + 'diffuseColor %lf %lf %lf\n' % (diffuseColor.red,
+                                                                                diffuseColor.green,
+                                                                                diffuseColor.blue))
+            proto.write((shapeLevel + 3) * indent + 'emissiveColor %lf %lf %lf\n' % (emissiveColor.red,
+                                                                                    emissiveColor.green,
+                                                                                    emissiveColor.blue))
+            if visualNode.material.shininess:
+                proto.write((shapeLevel + 3) * indent + 'shininess %lf\n' % (visualNode.material.shininess))
+            proto.write((shapeLevel + 3) * indent + 'specularColor %lf %lf %lf\n' % (specularColor.red,
+                                                                                    specularColor.green,
+                                                                                    specularColor.blue))
+            proto.write((shapeLevel + 3) * indent + 'transparency %lf\n' % (1.0 - visualNode.material.diffuse.alpha))
             proto.write((shapeLevel + 2) * indent + '}\n')
-        proto.write((shapeLevel + 1) * indent + '}\n')
+            proto.write((shapeLevel + 1) * indent + '}\n')
+        else:
+            if visualNode.material.defName is not None:
+                proto.write((shapeLevel + 1) * indent + 'appearance DEF %s PBRAppearance {\n' % visualNode.material.defName)
+            else:
+                proto.write((shapeLevel + 1) * indent + 'appearance PBRAppearance {\n')
+            ambientColor = RGBA2RGB(visualNode.material.ambient)
+            diffuseColor = RGBA2RGB(visualNode.material.diffuse, RGB_background=ambientColor)
+            emissiveColor = RGBA2RGB(visualNode.material.emission, RGB_background=ambientColor)
+            roughness = 1.0 - visualNode.material.specular.alpha * (visualNode.material.specular.red +
+                                                                    visualNode.material.specular.green +
+                                                                    visualNode.material.specular.blue) / 3.0
+            if visualNode.material.shininess:
+                roughness *= (1.0 - 0.5 * visualNode.material.shininess)
+            proto.write((shapeLevel + 2) * indent + 'baseColor %lf %lf %lf\n' % (diffuseColor.red,
+                                                                                diffuseColor.green,
+                                                                                diffuseColor.blue))
+            proto.write((shapeLevel + 2) * indent + 'transparency %lf\n' % (1.0 - visualNode.material.diffuse.alpha))
+            proto.write((shapeLevel + 2) * indent + 'roughness %lf\n' % roughness)
+            proto.write((shapeLevel + 2) * indent + 'metalness 0\n')
+            proto.write((shapeLevel + 2) * indent + 'emissiveColor %lf %lf %lf\n' % (emissiveColor.red,
+                                                                                    emissiveColor.green,
+                                                                                    emissiveColor.blue))
+            if visualNode.material.texture != "":
+                proto.write((shapeLevel + 2) * indent + 'baseColorMap ImageTexture {\n')
+                proto.write((shapeLevel + 3) * indent + 'url [ "' + visualNode.material.texture + '" ]\n')
+                proto.write((shapeLevel + 2) * indent + '}\n')
+
+                proto.write((shapeLevel + 2) * indent + 'textureTransform TextureTransform {\n')
+                proto.write((shapeLevel + 3) * indent + 'scale 1 -1\n')
+                proto.write((shapeLevel + 2) * indent + '}\n')
+            proto.write((shapeLevel + 1) * indent + '}\n')
 
     if visualNode.geometry.box.x != 0:
         proto.write((shapeLevel + 1) * indent + 'geometry Box {\n')
@@ -484,6 +527,21 @@ def URDFVisual(proto, visualNode, level, normal=False):
             if not visualNode.geometry.lineset:
                 proto.write((shapeLevel + 2) * indent + 'creaseAngle 1\n')
             proto.write((shapeLevel + 1) * indent + '}\n')
+
+    elif visualNode.geometry.mesh.url:
+        if visualNode.geometry.defName is not None:
+            proto.write((shapeLevel + 1) * indent + 'geometry USE %s\n' % visualNode.geometry.defName)
+        else:
+            if visualNode.geometry.name is not None:
+                visualNode.geometry.defName = computeDefName(visualNode.geometry.name)
+            if visualNode.geometry.defName is not None:
+                proto.write((shapeLevel + 1) * indent + 'geometry DEF %s Mesh {\n' % visualNode.geometry.defName)
+            else:
+                proto.write((shapeLevel + 1) * indent + 'geometry Mesh {\n')
+
+            proto.write((shapeLevel + 2) * indent + 'url ' + str(visualNode.geometry.mesh.url) + '\n')
+            proto.write((shapeLevel + 1) * indent + '}\n')
+
     proto.write(shapeLevel * indent + '}\n')
 
 
@@ -556,7 +614,7 @@ def URDFJoint(proto, joint, level, parentList, childList, linkList, jointList,
                 position = initPos[0]
                 del initPos[0]
         if position is not None:
-            proto.write((level + 2) * indent + 'position %lf \n' % position)
+            proto.write((level + 2) * indent + 'position %lf\n' % position)
             mat1 = matrixFromRotation(endpointRotation)
             mat2 = matrixFromRotation([axis[0], axis[1], axis[2], position])
             mat3 = multiplyMatrix(mat2, mat1)
@@ -576,7 +634,7 @@ def URDFJoint(proto, joint, level, parentList, childList, linkList, jointList,
             position = joint.limit.lower
             if joint.limit.upper >= joint.limit.lower:
                 position = (joint.limit.upper - joint.limit.lower) / 2.0 + joint.limit.lower
-            proto.write((level + 2) * indent + 'position %lf \n' % position)
+            proto.write((level + 2) * indent + 'position %lf\n' % position)
             length = math.sqrt(axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2])
             if length > 0:
                 endpointPosition[0] += axis[0] / length * position

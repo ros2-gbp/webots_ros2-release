@@ -47,8 +47,9 @@ def mkdirSafe(directory):
 
 
 def convert2urdf(inFile, outFile=None, normal=False, boxCollision=False,
-                 disableMeshOptimization=False, enableMultiFile=False, staticBase=False, toolSlot=None,
-                 initRotation='0 1 0 0', initPos=None, linkToDef=False, jointToDef=False):
+                 disableMeshOptimization=False, enableMultiFile=False,
+                 staticBase=False, toolSlot=None, initRotation='0 0 1 0',
+                 initPos=None, linkToDef=False, jointToDef=False):
     if not os.path.exists(inFile):
         sys.exit('Input file "%s" does not exists.' % inFile)
     if not type(initRotation) == str or len(initRotation.split()) != 4:
@@ -149,25 +150,24 @@ def convert2urdf(inFile, outFile=None, normal=False, boxCollision=False,
                     linkList.append(urdf2webots.parserURDF.getLink(link, inPath))
                 for link in linkList:
                     if urdf2webots.parserURDF.isRootLink(link.name, childList):
+                        # We want to skip links between the robot and the static environment.
                         rootLink = link
-                        # if root link has only one joint which type is fixed,
-                        # it should not be part of the model (link between robot and static environment)
-                        while True:
-                            directJoint = []
-                            found = False  # To avoid endless loop
+                        previousRootLink = link
+                        while rootLink in ['base_link', 'base_footprint']:
+                            directJoints = []
                             for joint in jointList:
                                 if joint.parent == rootLink.name:
-                                    directJoint.append(joint)
-                            if len(directJoint) == 1 and directJoint[0].type == 'fixed':
+                                    directJoints.append(joint)
+                            if len(directJoints) == 1:
                                 for childLink in linkList:
-                                    if childLink.name == directJoint[0].child:
+                                    if childLink.name == directJoints[0].child:
+                                        previousRootLink = rootLink
                                         rootLink = childLink
-                                        found = True
-                                        break
                             else:
+                                rootLink = previousRootLink
                                 break
-                            if not found:
-                                break
+
+
                         print('Root link: ' + rootLink.name)
                         break
 
@@ -208,7 +208,7 @@ if __name__ == '__main__':
                          help='If set, the base link will have the option to be static (disable physics)')
     optParser.add_option('--tool-slot', dest='toolSlot', default=None,
                          help='Specify the link that you want to add a tool slot too (exact link name from urdf)')
-    optParser.add_option('--rotation', dest='initRotation', default='0 1 0 0',
+    optParser.add_option('--rotation', dest='initRotation', default='0 0 1 0',
                          help='Set the rotation field of your PROTO file.')
     optParser.add_option('--init-pos', dest='initPos', default=None,
                          help='Set the initial positions of your robot joints. Example: --init-pos="[1.2, 0.5, -1.5]" would '

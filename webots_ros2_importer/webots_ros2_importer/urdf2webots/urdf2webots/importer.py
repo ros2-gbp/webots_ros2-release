@@ -47,8 +47,9 @@ def mkdirSafe(directory):
 
 
 def convert2urdf(inFile, outFile=None, normal=False, boxCollision=False,
-                 disableMeshOptimization=False, enableMultiFile=False, staticBase=False, toolSlot=None,
-                 initRotation='0 1 0 0', initPos=None):
+                 disableMeshOptimization=False, enableMultiFile=False,
+                 staticBase=False, toolSlot=None, initRotation='0 0 1 0',
+                 initPos=None, linkToDef=False, jointToDef=False):
     if not os.path.exists(inFile):
         sys.exit('Input file "%s" does not exists.' % inFile)
     if not type(initRotation) == str or len(initRotation.split()) != 4:
@@ -66,14 +67,16 @@ def convert2urdf(inFile, outFile=None, normal=False, boxCollision=False,
     urdf2webots.writeProto.staticBase = staticBase
     urdf2webots.writeProto.toolSlot = toolSlot
     urdf2webots.writeProto.initPos = initPos
+    urdf2webots.writeProto.linkToDef = linkToDef
+    urdf2webots.writeProto.jointToDef = jointToDef
 
     with open(inFile, 'r') as file:
         inPath = os.path.dirname(os.path.abspath(inFile))
         content = file.read()
-        packages = re.findall('"package://(.*)"', content)
-        if packages:
-            packageName = packages[0].split('/')[0]
-            directory = os.path.dirname(inFile)
+
+        for match in re.finditer('"package://(.*)"', content):
+            packageName = match.group(1).split('/')[0]
+            directory = inPath
             while packageName != os.path.split(directory)[1] and os.path.split(directory)[1]:
                 directory = os.path.dirname(directory)
             if not os.path.split(directory)[1]:
@@ -87,7 +90,7 @@ def convert2urdf(inFile, outFile=None, normal=False, boxCollision=False,
                                      % packageName)
             if os.path.split(directory)[1]:
                 packagePath = os.path.split(directory)[0]
-                content = content.replace('package:/', packagePath)
+                content = content.replace('package://'+packageName, packagePath+'/'+packageName)
             else:
                 sys.stderr.write('Can\'t determine package root path.\n')
 
@@ -147,25 +150,24 @@ def convert2urdf(inFile, outFile=None, normal=False, boxCollision=False,
                     linkList.append(urdf2webots.parserURDF.getLink(link, inPath))
                 for link in linkList:
                     if urdf2webots.parserURDF.isRootLink(link.name, childList):
+                        # We want to skip links between the robot and the static environment.
                         rootLink = link
-                        # if root link has only one joint which type is fixed,
-                        # it should not be part of the model (link between robot and static environment)
-                        while True:
-                            directJoint = []
-                            found = False  # To avoid endless loop
+                        previousRootLink = link
+                        while rootLink in ['base_link', 'base_footprint']:
+                            directJoints = []
                             for joint in jointList:
                                 if joint.parent == rootLink.name:
-                                    directJoint.append(joint)
-                            if len(directJoint) == 1 and directJoint[0].type == 'fixed':
+                                    directJoints.append(joint)
+                            if len(directJoints) == 1:
                                 for childLink in linkList:
-                                    if childLink.name == directJoint[0].child:
+                                    if childLink.name == directJoints[0].child:
+                                        previousRootLink = rootLink
                                         rootLink = childLink
-                                        found = True
-                                        break
                             else:
+                                rootLink = previousRootLink
                                 break
-                            if not found:
-                                break
+
+
                         print('Root link: ' + rootLink.name)
                         break
 
@@ -174,6 +176,7 @@ def convert2urdf(inFile, outFile=None, normal=False, boxCollision=False,
                         urdf2webots.parserURDF.parseGazeboElement(child, rootLink.name, linkList)
 
                 sensorList = (urdf2webots.parserURDF.IMU.list +
+                              urdf2webots.parserURDF.P3D.list +
                               urdf2webots.parserURDF.Camera.list +
                               urdf2webots.parserURDF.Lidar.list)
                 print('There are %d links, %d joints and %d sensors' % (len(linkList), len(jointList), len(sensorList)))
@@ -205,13 +208,16 @@ if __name__ == '__main__':
                          help='If set, the base link will have the option to be static (disable physics)')
     optParser.add_option('--tool-slot', dest='toolSlot', default=None,
                          help='Specify the link that you want to add a tool slot too (exact link name from urdf)')
-    optParser.add_option('--rotation', dest='initRotation', default='0 1 0 0',
+    optParser.add_option('--rotation', dest='initRotation', default='0 0 1 0',
                          help='Set the rotation field of your PROTO file.')
     optParser.add_option('--init-pos', dest='initPos', default=None,
                          help='Set the initial positions of your robot joints. Example: --init-pos="[1.2, 0.5, -1.5]" would '
                          'set the first 3 joints of your robot to the specified values, and leave the rest with their '
                          'default value')
+    optParser.add_option('--link-to-def', dest='linkToDef', action='store_true', default=False,
+                         help='If set, urdf link names are also used as DEF names as well as solid names.')
+    optParser.add_option('--joint-to-def', dest='jointToDef', action='store_true', default=False,
+                         help='If set, urdf joint names are also used as DEF names as well as joint names.')
     options, args = optParser.parse_args()
-
     convert2urdf(options.inFile, options.outFile, options.normal, options.boxCollision, options.disableMeshOptimization,
-                 options.enableMultiFile, options.staticBase, options.toolSlot, options.initRotation, options.initPos)
+                 options.enableMultiFile, options.staticBase, options.toolSlot, options.initRotation, options.initPos, options.linkToDef, options.jointToDef)

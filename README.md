@@ -1,3 +1,39 @@
+## webots_ros2 (rolling) - 1.2.0-2
+
+The packages in the `webots_ros2` repository were released into the `rolling` distro by running `/home/benjamin/.local/bin/bloom-release -r rolling webots_ros2 --override-release-repository-url https://github.com/ros2-gbp/webots_ros2-release.git` on `Fri, 24 Dec 2021 07:30:29 -0000`
+
+These packages were released:
+- `webots_ros2`
+- `webots_ros2_control`
+- `webots_ros2_core`
+- `webots_ros2_driver`
+- `webots_ros2_epuck`
+- `webots_ros2_importer`
+- `webots_ros2_mavic`
+- `webots_ros2_msgs`
+- `webots_ros2_tesla`
+- `webots_ros2_tests`
+- `webots_ros2_tiago`
+- `webots_ros2_turtlebot`
+- `webots_ros2_universal_robot`
+
+Version of package(s) in repository `webots_ros2`:
+
+- upstream repository: https://github.com/cyberbotics/webots_ros2.git
+- release repository: https://github.com/cyberbotics/webots_ros2-release.git
+- rosdistro version: `1.1.2-2`
+- old version: `1.2.0-1`
+- new version: `1.2.0-2`
+
+Versions of tools used:
+
+- bloom version: `0.10.7`
+- catkin_pkg version: `0.4.24`
+- rosdep version: `0.21.0`
+- rosdistro version: `0.8.3`
+- vcstools version: `0.1.42`
+
+
 ## webots_ros2 (galactic) - 1.2.0-2
 
 The packages in the `webots_ros2` repository were released into the `galactic` distro by running `/home/benjamin/.local/bin/bloom-release -r galactic webots_ros2 --override-release-repository-url https://github.com/ros2-gbp/webots_ros2-release.git` on `Thu, 23 Dec 2021 16:26:16 -0000`

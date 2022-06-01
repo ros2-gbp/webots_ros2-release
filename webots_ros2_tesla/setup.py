@@ -18,7 +18,7 @@ data_files.append(('share/' + package_name, ['package.xml']))
 
 setup(
     name=package_name,
-    version='1.2.2',
+    version='1.2.3',
     packages=[package_name],
     data_files=data_files,
     install_requires=['setuptools', 'launch'],
@@ -39,7 +39,6 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'tesla_driver = webots_ros2_tesla.tesla_driver:main',
             'lane_follower = webots_ros2_tesla.lane_follower:main'
         ],
         'launch.frontend.launch_extension': ['launch_ros = launch_ros']

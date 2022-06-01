@@ -2632,9 +2632,6 @@ class Robot(_object):
     def __internalGetDevice(self, name):
         return _controller.Robot___internalGetDevice(self, name)
 
-    def getType(self):
-        return _controller.Robot_getType(self)
-
     def batterySensorEnable(self, samplingPeriod):
         return _controller.Robot_batterySensorEnable(self, samplingPeriod)
 

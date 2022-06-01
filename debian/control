@@ -1,0 +1,12 @@
+Source: ros-rolling-webots-ros2-importer
+Section: misc
+Priority: optional
+Maintainer: Cyberbotics <support@cyberbotics.com>
+Build-Depends: debhelper (>= 9.0.0), python3-numpy <!nocheck>, python3-pil <!nocheck>, python3-pycodestyle <!nocheck>, python3-pytest <!nocheck>, ros-rolling-ament-copyright <!nocheck>, ros-rolling-ament-flake8 <!nocheck>, ros-rolling-ament-pep257 <!nocheck>, ros-rolling-ros-workspace, python3-all, python3-setuptools, dh-python
+Homepage: http://wiki.ros.org/webots_ros2
+Standards-Version: 3.9.2
+
+Package: ros-rolling-webots-ros2-importer
+Architecture: any
+Depends: ${python3:Depends}, ${misc:Depends}, python3-collada, python3-lark, ros-rolling-builtin-interfaces, ros-rolling-xacro, ros-rolling-ros-workspace
+Description: This package allows to convert URDF and XACRO files into Webots PROTO files.

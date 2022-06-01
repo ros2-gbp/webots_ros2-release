@@ -42,6 +42,7 @@ namespace webots_ros2_driver
   WebotsNode::WebotsNode(std::string name, webots::Supervisor *robot) : Node(name), mRobot(robot), mPluginLoader(gPluginInterfaceName, gPluginInterface)
   {
     mRobotDescription = this->declare_parameter<std::string>("robot_description", "");
+    mSetRobotStatePublisher = this->declare_parameter<bool>("set_robot_state_publisher", false);
     if (mRobotDescription != "")
     {
       mRobotDescriptionDocument = std::make_shared<tinyxml2::XMLDocument>();
@@ -112,10 +113,10 @@ namespace webots_ros2_driver
 
   void WebotsNode::init()
   {
-    setAnotherNodeParameter("robot_state_publisher", "robot_description", mRobot->getUrdf());
+    if (mSetRobotStatePublisher)
+      setAnotherNodeParameter("robot_state_publisher", "robot_description", mRobot->getUrdf());
 
     mStep = mRobot->getBasicTimeStep();
-    mTimer = this->create_wall_timer(std::chrono::milliseconds(1), std::bind(&WebotsNode::timerCallback, this));
 
     // Load static plugins
     // Static plugins are automatically configured based on the robot model.
@@ -212,19 +213,19 @@ namespace webots_ros2_driver
     return plugin;
   }
 
-  void WebotsNode::timerCallback()
+  int WebotsNode::step()
   {
-    if (mRobot->step(mStep) == -1) {
-      mTimer->cancel();
-      exit(0);
-      return;
-    }
+    const int result = mRobot->step(mStep);
+    if (result == -1)
+      return result;
     for (std::shared_ptr<PluginInterface> plugin : mPlugins)
       plugin->step();
 
     mClockMessage.clock = rclcpp::Time(mRobot->getTime() * 1e9);
     mClockPublisher->publish(mClockMessage);
-  }
+
+    return result;
+}
 
   void WebotsNode::setAnotherNodeParameter(std::string anotherNodeName, std::string parameterName, std::string parameterValue)
   {

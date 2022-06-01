@@ -20,6 +20,7 @@ namespace webots_ros2_driver
   {
     Ros2SensorPlugin::init(node, parameters);
     mIsEnabled = false;
+    mRecognitionIsEnabled = false;
     mCamera = mNode->robot()->getCamera(parameters["name"]);
 
     assert(mCamera != NULL);
@@ -35,17 +36,18 @@ namespace webots_ros2_driver
     mImageMessage.encoding = sensor_msgs::image_encodings::BGRA8;
 
     // CameraInfo publisher
-    rclcpp::QoS cameraInfoQos(1);
-    cameraInfoQos.reliable();
-    cameraInfoQos.transient_local();
-    cameraInfoQos.keep_last(1);
-    mCameraInfoPublisher = mNode->create_publisher<sensor_msgs::msg::CameraInfo>(mTopicName + "/camera_info", cameraInfoQos);
+    mCameraInfoPublisher = mNode->create_publisher<sensor_msgs::msg::CameraInfo>(mTopicName + "/camera_info", rclcpp::SensorDataQoS().reliable());
     mCameraInfoMessage.header.stamp = mNode->get_clock()->now();
     mCameraInfoMessage.header.frame_id = mFrameName;
     mCameraInfoMessage.height = mCamera->getHeight();
     mCameraInfoMessage.width = mCamera->getWidth();
     mCameraInfoMessage.distortion_model = "plumb_bob";
-    const double focalLength = (mCamera->getFocalLength() == 0) ? 570.34 : mCamera->getFocalLength();
+
+    // Convert FoV to focal length.
+    // Reference: https://en.wikipedia.org/wiki/Focal_length#In_photography
+    const double diagonal = sqrt(pow(mCamera->getWidth(), 2) + pow(mCamera->getHeight(), 2));
+    const double focalLength =  0.5 * diagonal * (cos(0.5 * mCamera->getFov()) / sin(0.5 * mCamera->getFov()));
+
     mCameraInfoMessage.d = {0.0, 0.0, 0.0, 0.0, 0.0};
     mCameraInfoMessage.r = {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
     mCameraInfoMessage.k = {
@@ -56,7 +58,6 @@ namespace webots_ros2_driver
         focalLength, 0.0, (double)mCamera->getWidth() / 2, 0.0,
         0.0, focalLength, (double)mCamera->getHeight() / 2, 0.0,
         0.0, 0.0, 1.0, 0.0};
-    mCameraInfoPublisher->publish(mCameraInfoMessage);
 
     // Recognition publisher
     if (mCamera->hasRecognition())
@@ -94,11 +95,22 @@ namespace webots_ros2_driver
       mIsEnabled = shouldBeEnabled;
     }
 
+    if (recognitionSubscriptionsExist != mRecognitionIsEnabled)
+    {
+      if (recognitionSubscriptionsExist)
+        mCamera->recognitionEnable(mPublishTimestepSyncedMs);
+      else
+        mCamera->recognitionDisable();
+      mRecognitionIsEnabled = recognitionSubscriptionsExist;
+    }
+
     // Publish data
     if (mAlwaysOn || imageSubscriptionsExist)
       publishImage();
     if (recognitionSubscriptionsExist)
       publishRecognition();
+    if (mCameraInfoPublisher->get_subscription_count() > 0)
+      mCameraInfoPublisher->publish(mCameraInfoMessage);
   }
 
   void Ros2Camera::publishImage()
@@ -120,6 +132,8 @@ namespace webots_ros2_driver
     auto objects = mCamera->getRecognitionObjects();
     mRecognitionMessage.header.stamp = mNode->get_clock()->now();
     mWebotsRecognitionMessage.header.stamp = mNode->get_clock()->now();
+    mRecognitionMessage.detections.clear();
+    mWebotsRecognitionMessage.objects.clear();
 
     for (size_t i = 0; i < mCamera->getRecognitionNumberOfObjects(); i++)
     {
@@ -137,8 +151,13 @@ namespace webots_ros2_driver
       hypothesis.pose.pose.position = position;
       hypothesis.pose.pose.orientation = orientation;
       detection.results.push_back(hypothesis);
+      #if FOXY || GALACTIC
       detection.bbox.center.x = objects[i].position_on_image[0];
       detection.bbox.center.y = objects[i].position_on_image[1];
+      #else
+      detection.bbox.center.position.x = objects[i].position_on_image[0];
+      detection.bbox.center.position.y = objects[i].position_on_image[1];
+      #endif
       detection.bbox.size_x = objects[i].size_on_image[0];
       detection.bbox.size_y = objects[i].size_on_image[1];
       mRecognitionMessage.detections.push_back(detection);
@@ -149,8 +168,13 @@ namespace webots_ros2_driver
       recognitionWebotsObject.model = std::string(objects[i].model);
       recognitionWebotsObject.pose.pose.position = position;
       recognitionWebotsObject.pose.pose.orientation = orientation;
+      #if FOXY || GALACTIC
       recognitionWebotsObject.bbox.center.x = objects[i].position_on_image[0];
       recognitionWebotsObject.bbox.center.y = objects[i].position_on_image[1];
+      #else
+      recognitionWebotsObject.bbox.center.position.x = objects[i].position_on_image[0];
+      recognitionWebotsObject.bbox.center.position.y = objects[i].position_on_image[1];
+      #endif
       recognitionWebotsObject.bbox.size_x = objects[i].size_on_image[0];
       recognitionWebotsObject.bbox.size_y = objects[i].size_on_image[1];
       for (size_t j = 0; j < objects[i].number_of_colors; j++)

@@ -2,7 +2,6 @@
 import math
 import os
 import sys
-import struct
 import numpy
 try:
     from PIL import Image
@@ -16,15 +15,13 @@ except ImportError as e:
 import numbers
 
 from urdf2webots.gazebo_materials import materials
-from urdf2webots.math_utils import convertRPYtoEulerAxis
+from urdf2webots.math_utils import convertRPYtoEulerAxis, rotateVector, combineRotations, combineTranslations
 
 try:
     from collada import Collada, lineset
     colladaIsAvailable = True
 except ImportError:
     colladaIsAvailable = False
-
-counter = 0
 
 # to pass from external
 robotName = ''
@@ -351,12 +348,12 @@ class Camera():
         self.width = None
         self.height = None
         self.noise = None
+        self.isImager = True
 
     def export(self, file, indentationLevel):
         """Export this camera."""
         indent = '  '
         file.write(indentationLevel * indent + 'Camera {\n')
-        # rotation to convert from REP103 to webots viewport
         file.write(indentationLevel * indent + '  name "%s"\n' % self.name)
         if self.fov:
             file.write(indentationLevel * indent + '  fieldOfView %lf\n' % self.fov)
@@ -554,7 +551,7 @@ def getPosition(node):
     return position
 
 
-def getRotation(node, isCylinder=False):
+def getRotation(node):
     """Read rotation of a phsical or visual object."""
     rotation = [0.0, 0.0, 0.0]
     if hasElement(node, 'origin'):
@@ -562,10 +559,7 @@ def getRotation(node, isCylinder=False):
         rotation[0] = float(orientationString[0])
         rotation[1] = float(orientationString[1])
         rotation[2] = float(orientationString[2])
-    if isCylinder:
-        return convertRPYtoEulerAxis(rotation, True)
-    else:
-        return convertRPYtoEulerAxis(rotation, False)
+    return convertRPYtoEulerAxis(rotation)
 
 
 def getInertia(node):
@@ -599,12 +593,9 @@ def getVisual(link, node, path):
             if visualElement.getElementsByTagName('origin')[0].getAttribute('xyz'):
                 visual.position = getPosition(visualElement)
             if visualElement.getElementsByTagName('origin')[0].getAttribute('rpy'):
-                if hasElement(visualElement.getElementsByTagName('geometry')[0], 'cylinder'):
-                    visual.rotation = getRotation(visualElement, True)
-                else:
-                    visual.rotation = getRotation(visualElement)
+                visual.rotation = getRotation(visualElement)
         elif hasElement(visualElement.getElementsByTagName('geometry')[0], 'cylinder'):
-            visual.rotation = getRotation(visualElement, True)
+            visual.rotation = getRotation(visualElement)
 
         geometryElement = visualElement.getElementsByTagName('geometry')[0]
 
@@ -708,12 +699,9 @@ def getCollision(link, node, path):
             if collisionElement.getElementsByTagName('origin')[0].getAttribute('xyz'):
                 collision.position = getPosition(collisionElement)
             if collisionElement.getElementsByTagName('origin')[0].getAttribute('rpy'):
-                if hasElement(collisionElement.getElementsByTagName('geometry')[0], 'cylinder'):
-                    collision.rotation = getRotation(collisionElement, True)
-                else:
-                    collision.rotation = getRotation(collisionElement)
+                collision.rotation = getRotation(collisionElement)
         elif hasElement(collisionElement.getElementsByTagName('geometry')[0], 'cylinder'):
-            collision.rotation = getRotation(collisionElement, True)
+            collision.rotation = getRotation(collisionElement)
 
         geometryElement = collisionElement.getElementsByTagName('geometry')[0]
         if hasElement(geometryElement, 'box'):
@@ -866,6 +854,62 @@ def isRootLink(link, childList):
             return False
     return True
 
+def removeDummyLinksAndStaticBaseFlag(linkList, jointList, toolSlot):
+    """Remove the dummy links (links without masses) and return true in case a dummy link should
+    set the base of the robot as static. """
+    staticBase = False
+    linkIndex = 0
+    childList = []
+    for joint in jointList:
+        childList.append(joint.child)
+
+    while linkIndex < len(linkList):
+        link = linkList[linkIndex]
+
+        # We want to skip links between the robot root and the static environment.
+        if isRootLink(link.name, childList):
+            linkIndex += 1
+            continue
+
+        # This link will not have a 'physics' field and is not used to have a toolSlot or a static base -> remove it
+        if link.inertia.mass is None and not link.collision and link.name != toolSlot:
+            parentJointIndex = None
+            childJointIndex = None
+            index = -1
+            for joint in jointList:
+                index += 1
+                if joint.parent == link.name:
+                    childJointIndex = index
+                elif joint.child == link.name:
+                    parentJointIndex = index
+
+            if parentJointIndex is not None:
+                if childJointIndex is not None:
+                    jointList[parentJointIndex].child = jointList[childJointIndex].child
+                    jointList[parentJointIndex].position = combineTranslations(jointList[parentJointIndex].position, rotateVector(jointList[childJointIndex].position, jointList[parentJointIndex].rotation))
+                    jointList[parentJointIndex].rotation = combineRotations(jointList[childJointIndex].rotation, jointList[parentJointIndex].rotation)
+                    jointList[parentJointIndex].name = jointList[parentJointIndex].parent + "-" + jointList[parentJointIndex].child
+                    jointList.remove(jointList[childJointIndex])
+                else:
+                    # Special case for dummy non-root links used to fix the base of the robot
+                    parentLink = jointList[parentJointIndex].parent
+                    if isRootLink(parentLink, childList):
+                        # Ensure the parent link does not have physics, if it does, it should be kept as-is
+                        # since some sensors require the parent to have physics
+                        for l in linkList:
+                            if l.name == parentLink and l.inertia.mass is None:
+                                staticBase = True
+
+                    jointList.remove(jointList[parentJointIndex])
+
+            # This link can be removed
+            linkList.remove(link)
+
+        else:
+            linkIndex += 1
+
+    childList.clear()
+    return staticBase
 
 def parseGazeboElement(element, parentLink, linkList):
     """Parse a Gazebo element."""

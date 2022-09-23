@@ -223,7 +223,7 @@ class Brake(Device):
             return self.__motor
     def getPositionSensor(self):
         try:
-            return self.instance
+            return self.__positionSensor
         except AttributeError:
             self.__positionSensor = Robot.internalGetDeviceFromTag(self.getPositionSensorTag())
             return self.__positionSensor
@@ -245,32 +245,32 @@ class CameraRecognitionObject(object):
     colors = property(_controller.CameraRecognitionObject_colors_get, _controller.CameraRecognitionObject_colors_set)
     model = property(_controller.CameraRecognitionObject_model_get, _controller.CameraRecognitionObject_model_set)
 
-    def get_position(self):
-        return _controller.CameraRecognitionObject_get_position(self)
+    def getPosition(self):
+        return _controller.CameraRecognitionObject_getPosition(self)
 
-    def get_orientation(self):
-        return _controller.CameraRecognitionObject_get_orientation(self)
+    def getOrientation(self):
+        return _controller.CameraRecognitionObject_getOrientation(self)
 
-    def get_size(self):
-        return _controller.CameraRecognitionObject_get_size(self)
+    def getSize(self):
+        return _controller.CameraRecognitionObject_getSize(self)
 
-    def get_position_on_image(self):
-        return _controller.CameraRecognitionObject_get_position_on_image(self)
+    def getPositionOnImage(self):
+        return _controller.CameraRecognitionObject_getPositionOnImage(self)
 
-    def get_size_on_image(self):
-        return _controller.CameraRecognitionObject_get_size_on_image(self)
+    def getSizeOnImage(self):
+        return _controller.CameraRecognitionObject_getSizeOnImage(self)
 
-    def get_colors(self):
-        return _controller.CameraRecognitionObject_get_colors(self)
+    def getColors(self):
+        return _controller.CameraRecognitionObject_getColors(self)
 
-    def get_id(self):
-        return _controller.CameraRecognitionObject_get_id(self)
+    def getId(self):
+        return _controller.CameraRecognitionObject_getId(self)
 
-    def get_number_of_colors(self):
-        return _controller.CameraRecognitionObject_get_number_of_colors(self)
+    def getNumberOfColors(self):
+        return _controller.CameraRecognitionObject_getNumberOfColors(self)
 
-    def get_model(self):
-        return _controller.CameraRecognitionObject_get_model(self)
+    def getModel(self):
+        return _controller.CameraRecognitionObject_getModel(self)
 
     def __init__(self):
         _controller.CameraRecognitionObject_swiginit(self, _controller.new_CameraRecognitionObject())
@@ -859,20 +859,11 @@ class Field(object):
     def removeSF(self):
         return _controller.Field_removeSF(self)
 
-    def importMFNode(self, position, filename):
-        return _controller.Field_importMFNode(self, position, filename)
-
     def importMFNodeFromString(self, position, nodeString):
         return _controller.Field_importMFNodeFromString(self, position, nodeString)
 
-    def importSFNode(self, filename):
-        return _controller.Field_importSFNode(self, filename)
-
     def importSFNodeFromString(self, nodeString):
         return _controller.Field_importSFNodeFromString(self, nodeString)
-
-    def removeMFNode(self, position):
-        return _controller.Field_removeMFNode(self, position)
 
 # Register Field in _controller:
 _controller.Field_swigregister(Field)
@@ -1457,15 +1448,15 @@ class ContactPoint(object):
     point = property(_controller.ContactPoint_point_get, _controller.ContactPoint_point_set)
     node_id = property(_controller.ContactPoint_node_id_get, _controller.ContactPoint_node_id_set)
 
-    def get_point(self):
-        return _controller.ContactPoint_get_point(self)
+    def getPoint(self):
+        return _controller.ContactPoint_getPoint(self)
 
-    def get_node_id(self):
-        return _controller.ContactPoint_get_node_id(self)
+    def getNodeId(self):
+        return _controller.ContactPoint_getNodeId(self)
 
     @property
     def point(self):
-        return self.get_point()
+        return self.getPoint()
 
 
     def __init__(self):
@@ -1486,6 +1477,7 @@ class Node(object):
     BACKGROUND = _controller.Node_BACKGROUND
     BILLBOARD = _controller.Node_BILLBOARD
     BOX = _controller.Node_BOX
+    CAD_SHAPE = _controller.Node_CAD_SHAPE
     CAPSULE = _controller.Node_CAPSULE
     COLOR = _controller.Node_COLOR
     CONE = _controller.Node_CONE
@@ -2103,6 +2095,12 @@ class Robot(object):
 
     def step(self, duration):
         return _controller.Robot_step(self, duration)
+
+    def stepBegin(self, duration):
+        return _controller.Robot_stepBegin(self, duration)
+
+    def stepEnd(self):
+        return _controller.Robot_stepEnd(self)
 
     def waitForUserInputEvent(self, event_type, timeout):
         return _controller.Robot_waitForUserInputEvent(self, event_type, timeout)

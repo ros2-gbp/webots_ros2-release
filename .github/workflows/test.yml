@@ -1,8 +1,10 @@
-name: CI
+name: ROS2 tests
 
 on:
   pull_request:
     types: [opened, synchronize, reopened, labeled, unlabeled]
+  schedule:
+    - cron:  '0 23 * * *'
 
 jobs:
   industrial_ci:
@@ -17,7 +19,7 @@ jobs:
       BEFORE_INIT_EMBED: source scripts/ci_before_init_embed.bash
       DOCKER_RUN_OPTS: -v /artifacts:/tmp/artifacts
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
         with:
          submodules: recursive
       - uses: 'ros-industrial/industrial_ci@master'

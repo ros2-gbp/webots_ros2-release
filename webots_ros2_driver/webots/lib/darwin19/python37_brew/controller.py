@@ -2104,6 +2104,12 @@ class Robot(object):
     def step(self, duration):
         return _controller.Robot_step(self, duration)
 
+    def stepBegin(self, duration):
+        return _controller.Robot_stepBegin(self, duration)
+
+    def stepEnd(self):
+        return _controller.Robot_stepEnd(self)
+
     def waitForUserInputEvent(self, event_type, timeout):
         return _controller.Robot_waitForUserInputEvent(self, event_type, timeout)
 

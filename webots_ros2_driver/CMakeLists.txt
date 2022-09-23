@@ -1,6 +1,14 @@
 cmake_minimum_required(VERSION 3.10)
 project(webots_ros2_driver)
 
+# Check which ROS distribution is used, ros2control depends of that
+if($ENV{ROS_DISTRO} MATCHES "foxy")
+  add_compile_definitions(FOXY)
+endif()
+if($ENV{ROS_DISTRO} MATCHES "galactic")
+  add_compile_definitions(GALACTIC)
+endif()
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -13,11 +21,6 @@ elseif($ENV{ROS_DISTRO} MATCHES "humble")
   add_compile_definitions(HUMBLE)
 elseif($ENV{ROS_DISTRO} MATCHES "rolling")
   add_compile_definitions(ROLLING)
-endif()
-
-# Check which repo is used (main or testing)
-if($ENV{ROS_REPO} MATCHES "main")
-  add_compile_definitions(MAIN_REPO)
 endif()
 
 # ROS2 Packages
@@ -161,6 +164,7 @@ add_library(
 ament_target_dependencies(${PROJECT_NAME}_imu
   rclcpp
   sensor_msgs
+  webots_ros2_msgs
   pluginlib
   tf2_ros
 )
@@ -227,6 +231,11 @@ endif()
 target_compile_definitions(driver PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
 target_compile_definitions(${PROJECT_NAME}_imu PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
 pluginlib_export_plugin_description_file(${PROJECT_NAME} webots_ros2_imu.xml)
+
+# Install ROS 2 nodes
+install(PROGRAMS ${PROJECT_NAME}/ros2_supervisor.py
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 # Ament export
 ament_export_include_directories(

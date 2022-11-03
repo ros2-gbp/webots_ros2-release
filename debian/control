@@ -1,0 +1,12 @@
+Source: ros-galactic-webots-ros2-tutorials
+Section: misc
+Priority: optional
+Maintainer: Soft_illusion <harsh.b.kakashaniya@gmail.com>
+Build-Depends: debhelper (>= 9.0.0), python3-pytest <!nocheck>, ros-galactic-ament-copyright <!nocheck>, ros-galactic-ament-flake8 <!nocheck>, ros-galactic-ament-pep257 <!nocheck>, ros-galactic-ros-workspace, python3-all, python3-setuptools, dh-python
+Homepage: https://www.youtube.com/c/soft-illusion
+Standards-Version: 3.9.2
+
+Package: ros-galactic-webots-ros2-tutorials
+Architecture: any
+Depends: ${python3:Depends}, ${misc:Depends}, ros-galactic-builtin-interfaces, ros-galactic-geometry-msgs, ros-galactic-rclpy, ros-galactic-std-msgs, ros-galactic-webots-ros2-core, ros-galactic-ros-workspace
+Description: This package is made to aid youtube Webots_ROS2 tutorial series

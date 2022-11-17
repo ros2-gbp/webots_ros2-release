@@ -31,9 +31,11 @@ from webots_ros2_driver.webots_launcher import WebotsLauncher, Ros2SupervisorLau
 from webots_ros2_driver.utils import controller_url_prefix
 
 
-def get_ros2_nodes(*args):
+def generate_launch_description():
     optional_nodes = []
     package_dir = get_package_share_directory('webots_ros2_tiago')
+    world = LaunchConfiguration('world')
+    mode = LaunchConfiguration('mode')
     use_rviz = LaunchConfiguration('rviz', default=False)
     use_nav = LaunchConfiguration('nav', default=False)
     use_slam = LaunchConfiguration('slam', default=False)
@@ -41,6 +43,13 @@ def get_ros2_nodes(*args):
     ros2_control_params = os.path.join(package_dir, 'resource', 'ros2_control.yml')
     nav2_map = os.path.join(package_dir, 'resource', 'map.yaml')
     use_sim_time = LaunchConfiguration('use_sim_time', default=True)
+
+    webots = WebotsLauncher(
+        world=PathJoinSubstitution([package_dir, 'worlds', world]),
+        mode=mode
+    )
+
+    ros2_supervisor = Ros2SupervisorLauncher()
 
     controller_manager_timeout = ['--controller-manager-timeout', '50']
     controller_manager_prefix = 'python.exe' if os.name == 'nt' else ''
@@ -126,38 +135,6 @@ def get_ros2_nodes(*args):
         condition=launch.conditions.IfCondition(use_slam)
     )
 
-    return [
-        joint_state_broadcaster_spawner,
-        diffdrive_controller_spawner,
-        rviz,
-        robot_state_publisher,
-        tiago_driver,
-        footprint_publisher,
-        slam_toolbox,
-    ] + optional_nodes
-
-
-def generate_launch_description():
-    package_dir = get_package_share_directory('webots_ros2_tiago')
-    world = LaunchConfiguration('world')
-    mode = LaunchConfiguration('mode')
-
-    webots = WebotsLauncher(
-        world=PathJoinSubstitution([package_dir, 'worlds', world]),
-        mode=mode
-    )
-
-    ros2_supervisor = Ros2SupervisorLauncher()
-
-    # The following line is important!
-    # This event handler respawns the ROS 2 nodes on simulation reset (supervisor process ends).
-    reset_handler = launch.actions.RegisterEventHandler(
-        event_handler=launch.event_handlers.OnProcessExit(
-            target_action=ros2_supervisor,
-            on_exit=get_ros2_nodes,
-        )
-    )
-
     return LaunchDescription([
         DeclareLaunchArgument(
             'world',
@@ -171,20 +148,17 @@ def generate_launch_description():
         ),
         webots,
         ros2_supervisor,
-
-        # This action will kill all nodes once the Webots simulation has exited
+        joint_state_broadcaster_spawner,
+        diffdrive_controller_spawner,
+        rviz,
+        robot_state_publisher,
+        tiago_driver,
+        footprint_publisher,
+        slam_toolbox,
         launch.actions.RegisterEventHandler(
             event_handler=launch.event_handlers.OnProcessExit(
                 target_action=webots,
-                on_exit=[
-                    launch.actions.UnregisterEventHandler(
-                        event_handler=reset_handler.event_handler
-                    ),
-                    launch.actions.EmitEvent(event=launch.events.Shutdown())
-                ],
+                on_exit=[launch.actions.EmitEvent(event=launch.events.Shutdown())],
             )
-        ),
-
-        # Add the reset event handler
-        reset_handler
-    ] + get_ros2_nodes())
+        )
+    ] + optional_nodes)

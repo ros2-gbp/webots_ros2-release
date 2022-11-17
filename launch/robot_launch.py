@@ -29,9 +29,16 @@ from webots_ros2_driver.webots_launcher import WebotsLauncher, Ros2SupervisorLau
 from webots_ros2_driver.utils import controller_url_prefix
 
 
-def get_ros2_nodes(*args):
+def generate_launch_description():
     package_dir = get_package_share_directory('webots_ros2_mavic')
+    world = LaunchConfiguration('world')
     robot_description = pathlib.Path(os.path.join(package_dir, 'resource', 'mavic_webots.urdf')).read_text()
+
+    webots = WebotsLauncher(
+        world=PathJoinSubstitution([package_dir, 'worlds', world])
+    )
+
+    ros2_supervisor = Ros2SupervisorLauncher()
 
     mavic_driver = Node(
         package='webots_ros2_driver',
@@ -43,30 +50,6 @@ def get_ros2_nodes(*args):
         ]
     )
 
-    return [
-        mavic_driver,
-    ]
-
-
-def generate_launch_description():
-    package_dir = get_package_share_directory('webots_ros2_mavic')
-    world = LaunchConfiguration('world')
-
-    webots = WebotsLauncher(
-        world=PathJoinSubstitution([package_dir, 'worlds', world])
-    )
-
-    ros2_supervisor = Ros2SupervisorLauncher()
-
-    # The following line is important!
-    # This event handler respawns the ROS 2 nodes on simulation reset (supervisor process ends).
-    reset_handler = launch.actions.RegisterEventHandler(
-        event_handler=launch.event_handlers.OnProcessExit(
-            target_action=ros2_supervisor,
-            on_exit=get_ros2_nodes,
-        )
-    )
-
     return LaunchDescription([
         DeclareLaunchArgument(
             'world',
@@ -75,20 +58,12 @@ def generate_launch_description():
         ),
         webots,
         ros2_supervisor,
-
+        mavic_driver,
         # This action will kill all nodes once the Webots simulation has exited
         launch.actions.RegisterEventHandler(
             event_handler=launch.event_handlers.OnProcessExit(
                 target_action=webots,
-                on_exit=[
-                    launch.actions.UnregisterEventHandler(
-                        event_handler=reset_handler.event_handler
-                    ),
-                    launch.actions.EmitEvent(event=launch.events.Shutdown())
-                ],
+                on_exit=[launch.actions.EmitEvent(event=launch.events.Shutdown())],
             )
-        ),
-
-        # Add the reset event handler
-        reset_handler
-    ] + get_ros2_nodes())
+        )
+    ])

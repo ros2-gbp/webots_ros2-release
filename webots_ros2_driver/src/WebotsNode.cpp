@@ -18,8 +18,7 @@
 #include <rclcpp/parameter_value.hpp>
 #include <rclcpp/timer.hpp>
 
-#include <webots/robot.h>
-#include <webots/device.h>
+#include <webots/Device.hpp>
 
 #include "webots_ros2_driver/PluginInterface.hpp"
 #include <webots_ros2_driver/plugins/static/Ros2Lidar.hpp>
@@ -47,7 +46,7 @@ namespace webots_ros2_driver
     gShutdownSignalReceived = true;
   }
 
-  WebotsNode::WebotsNode(std::string name) : Node(name), mPluginLoader(gPluginInterfaceName, gPluginInterface)
+  WebotsNode::WebotsNode(std::string name, webots::Supervisor *robot) : Node(name), mRobot(robot), mPluginLoader(gPluginInterfaceName, gPluginInterface)
   {
     mRobotDescription = this->declare_parameter<std::string>("robot_description", "");
     mSetRobotStatePublisher = this->declare_parameter<bool>("set_robot_state_publisher", false);
@@ -122,50 +121,48 @@ namespace webots_ros2_driver
 
   void WebotsNode::init()
   {
-    if (mSetRobotStatePublisher){
-      std::string prefix = "";
-      setAnotherNodeParameter("robot_state_publisher", "robot_description", wb_robot_get_urdf(prefix.c_str()));
-    }
-      
-    mStep = wb_robot_get_basic_time_step();
+    if (mSetRobotStatePublisher)
+      setAnotherNodeParameter("robot_state_publisher", "robot_description", mRobot->getUrdf());
+
+    mStep = mRobot->getBasicTimeStep();
 
     // Load static plugins
     // Static plugins are automatically configured based on the robot model.
     // The static plugins will try to guess parameter based on the robot model,
     // but one can overwrite the default behavior in the <webots> section.
     // Typical static plugins are ROS 2 interfaces for Webots devices.
-    for (int i = 0; i < wb_robot_get_number_of_devices(); i++)
+    for (int i = 0; i < mRobot->getNumberOfDevices(); i++)
     {
-      WbDeviceTag device = wb_robot_get_device_by_index(i);
+      webots::Device *device = mRobot->getDeviceByIndex(i);
 
       // Prepare parameters
-      std::unordered_map<std::string, std::string> parameters = getDeviceRosProperties(wb_device_get_name(device));
+      std::unordered_map<std::string, std::string> parameters = getDeviceRosProperties(device->getName());
       if (parameters["enabled"] == "false")
         continue;
-      parameters["name"] = wb_device_get_name(device);
+      parameters["name"] = device->getName();
 
       std::shared_ptr<PluginInterface> plugin = nullptr;
-      switch (wb_device_get_node_type(device))
+      switch (device->getNodeType())
       {
-      case WB_NODE_LIDAR:
+      case webots::Node::LIDAR:
         plugin = std::make_shared<webots_ros2_driver::Ros2Lidar>();
         break;
-      case WB_NODE_CAMERA:
+      case webots::Node::CAMERA:
         plugin = std::make_shared<webots_ros2_driver::Ros2Camera>();
         break;
-      case WB_NODE_GPS:
+      case webots::Node::GPS:
         plugin = std::make_shared<webots_ros2_driver::Ros2GPS>();
         break;
-      case WB_NODE_RANGE_FINDER:
+      case webots::Node::RANGE_FINDER:
         plugin = std::make_shared<webots_ros2_driver::Ros2RangeFinder>();
         break;
-      case WB_NODE_DISTANCE_SENSOR:
+      case webots::Node::DISTANCE_SENSOR:
         plugin = std::make_shared<webots_ros2_driver::Ros2DistanceSensor>();
         break;
-      case WB_NODE_LIGHT_SENSOR:
+      case webots::Node::LIGHT_SENSOR:
         plugin = std::make_shared<webots_ros2_driver::Ros2LightSensor>();
         break;
-      case WB_NODE_LED:
+      case webots::Node::LED:
         plugin = std::make_shared<webots_ros2_driver::Ros2LED>();
         break;
       }
@@ -232,7 +229,7 @@ namespace webots_ros2_driver
       mWaitingForUrdfRobotToBeRemoved = true;
     }
 
-    const int result = wb_robot_step(mStep);
+    const int result = mRobot->step(mStep);
     if (result == -1)
       return result;
     for (std::shared_ptr<PluginInterface> plugin : mPlugins)

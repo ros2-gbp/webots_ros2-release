@@ -14,16 +14,18 @@
 
 #include <memory>
 #include <rclcpp/rclcpp.hpp>
-#include <webots/vehicle/driver.h>
-#include <webots/robot.h>
 #include <webots_ros2_driver/WebotsNode.hpp>
+#include <webots/vehicle/Driver.hpp>
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
+  webots::Supervisor *robot;
+
   // Check if the robot can be a driver, if not create a simple Supervisor
-  if (wbu_driver_initialization_is_possible())
-    wbu_driver_init();
+  if (webots::Driver::isInitialisationPossible())
+    robot = new webots::Driver();
   else
-    wb_robot_init();
+    robot = new webots::Supervisor();
 
   // Let WebotsNode handle the system signals
   webots_ros2_driver::WebotsNode::handleSignals();
@@ -36,19 +38,18 @@ int main(int argc, char **argv) {
 #endif
   rclcpp::init(argc, argv, options);
 
-  std::string robotName(wb_robot_get_name());
+  std::string robotName = robot->getName();
   for (char notAllowedChar : " -.)(")
     std::replace(robotName.begin(), robotName.end(), notAllowedChar, '_');
 
-  std::shared_ptr<webots_ros2_driver::WebotsNode> node =
-      std::make_shared<webots_ros2_driver::WebotsNode>(robotName);
+  std::shared_ptr<webots_ros2_driver::WebotsNode> node = std::make_shared<webots_ros2_driver::WebotsNode>(robotName, robot);
   node->init();
   while (true) {
     if (node->step() == -1)
       break;
     rclcpp::spin_some(node);
   }
-  wb_robot_cleanup();
+  delete robot;
   rclcpp::shutdown();
   return 0;
 }

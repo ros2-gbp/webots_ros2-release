@@ -32,6 +32,7 @@ find_package(rclcpp REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(vision_msgs REQUIRED)
 find_package(webots_ros2_msgs REQUIRED)
@@ -44,42 +45,72 @@ else()
   find_package(PythonLibs 3.10 EXACT REQUIRED)
 endif()
 
-add_custom_target(compile-lib-controller ALL
-  COMMAND ${CMAKE_COMMAND} -E env "WEBOTS_HOME=${CMAKE_CURRENT_SOURCE_DIR}/webots" make release -f Makefile > /dev/null 2>&1
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/webots/src/controller
-)
+if(UNIX AND NOT APPLE)
+  set(WEBOTS_LIB_BASE webots/lib/linux-gnu)
+endif()
 
-add_custom_target(compile-lib-vehicle ALL
-  COMMAND ${CMAKE_COMMAND} -E env "WEBOTS_HOME=${CMAKE_CURRENT_SOURCE_DIR}/webots" make release -f Makefile > /dev/null 2>&1
-  DEPENDS compile-lib-controller
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/webots/projects/default/libraries/vehicle
-)
+if(APPLE)
+  set(WEBOTS_LIB_BASE webots/lib/darwin19)
+endif()
 
-set(WEBOTS_LIB_BASE webots/lib/controller)
+if(MSVC OR MSYS OR MINGW OR WIN32)
+  set(WEBOTS_LIB_BASE webots/lib/msys)
+endif()
 
 include_directories(
   include
-  webots/include/controller/c
-  webots/include/controller/cpp
+  webots/include/c
+  webots/include/cpp
   ${PYTHON_INCLUDE_DIRS}
 )
 
 link_directories(${WEBOTS_LIB_BASE})
 
-set(WEBOTS_LIB
-  ${CMAKE_SHARED_LIBRARY_PREFIX}Controller${CMAKE_SHARED_LIBRARY_SUFFIX}
-  ${CMAKE_SHARED_LIBRARY_PREFIX}CppController${CMAKE_SHARED_LIBRARY_SUFFIX}
-  ${CMAKE_SHARED_LIBRARY_PREFIX}driver${CMAKE_SHARED_LIBRARY_SUFFIX}
-  ${CMAKE_SHARED_LIBRARY_PREFIX}CppDriver${CMAKE_SHARED_LIBRARY_SUFFIX}
-  ${CMAKE_SHARED_LIBRARY_PREFIX}car${CMAKE_SHARED_LIBRARY_SUFFIX}
-  ${CMAKE_SHARED_LIBRARY_PREFIX}CppCar${CMAKE_SHARED_LIBRARY_SUFFIX}
-)
+if(MSVC OR MSYS OR MINGW OR WIN32)
+  # Windows requires the libController C++ part to be compiled.
+  # See more here: https://cyberbotics.com/doc/guide/using-your-ide#visual-studio
+  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+  file(GLOB CppController_SRC CONFIGURE_DEPENDS "webots/source/cpp/*.cpp")
+  file(GLOB CppCarDriver_SRC CONFIGURE_DEPENDS "webots/source/cpp/vehicle/*.cpp")
+  add_library(
+    CppControllerRos
+    SHARED
+    ${CppController_SRC}
+    ${CppCarDriver_SRC}
+  )
+  target_link_libraries(CppControllerRos
+    ${CMAKE_SHARED_LIBRARY_PREFIX}Controller${CMAKE_SHARED_LIBRARY_SUFFIX}
+    ${CMAKE_SHARED_LIBRARY_PREFIX}car${CMAKE_SHARED_LIBRARY_SUFFIX}
+    ${CMAKE_SHARED_LIBRARY_PREFIX}driver${CMAKE_SHARED_LIBRARY_SUFFIX}
+  )
+  install(TARGETS CppControllerRos
+    LIBRARY DESTINATION lib
+  )
+  set(WEBOTS_LIB
+    ${CMAKE_SHARED_LIBRARY_PREFIX}Controller${CMAKE_SHARED_LIBRARY_SUFFIX}
+    ${CMAKE_SHARED_LIBRARY_PREFIX}car${CMAKE_SHARED_LIBRARY_SUFFIX}
+    ${CMAKE_SHARED_LIBRARY_PREFIX}driver${CMAKE_SHARED_LIBRARY_SUFFIX}
+    CppControllerRos
+  )
+  ament_export_libraries(CppControllerRos)
+else()
+  set(WEBOTS_LIB
+    ${CMAKE_SHARED_LIBRARY_PREFIX}Controller${CMAKE_SHARED_LIBRARY_SUFFIX}
+    ${CMAKE_SHARED_LIBRARY_PREFIX}CppController${CMAKE_SHARED_LIBRARY_SUFFIX}
+    ${CMAKE_SHARED_LIBRARY_PREFIX}driver${CMAKE_SHARED_LIBRARY_SUFFIX}
+    ${CMAKE_SHARED_LIBRARY_PREFIX}CppDriver${CMAKE_SHARED_LIBRARY_SUFFIX}
+    ${CMAKE_SHARED_LIBRARY_PREFIX}car${CMAKE_SHARED_LIBRARY_SUFFIX}
+    ${CMAKE_SHARED_LIBRARY_PREFIX}CppCar${CMAKE_SHARED_LIBRARY_SUFFIX}
+  )
+endif()
 
-ament_python_install_package(controller
-  PACKAGE_DIR ${WEBOTS_LIB_BASE}/python/controller)
-
-ament_python_install_package(vehicle
-  PACKAGE_DIR ${WEBOTS_LIB_BASE}/python/vehicle)
+if($ENV{ROS_DISTRO} MATCHES "foxy" OR $ENV{ROS_DISTRO} MATCHES "galactic")
+  ament_python_install_package(${PROJECT_NAME}_webots
+    PACKAGE_DIR ${WEBOTS_LIB_BASE}/python38)
+else()
+  ament_python_install_package(${PROJECT_NAME}_webots
+    PACKAGE_DIR ${WEBOTS_LIB_BASE}/python310)
+endif()
 
 ament_python_install_package(${PROJECT_NAME}
   PACKAGE_DIR ${PROJECT_NAME})
@@ -107,14 +138,12 @@ ament_target_dependencies(driver
   pluginlib
   sensor_msgs
   std_msgs
+  tf2_geometry_msgs
   tf2_ros
   vision_msgs
   webots_ros2_msgs
   tinyxml2_vendor
   TinyXML2
-)
-add_dependencies(driver
-  compile-lib-vehicle
 )
 target_link_libraries(driver
   ${WEBOTS_LIB}
@@ -125,7 +154,8 @@ install(
   DESTINATION include
 )
 install(TARGETS driver
-  RUNTIME DESTINATION lib/${PROJECT_NAME}
+  RUNTIME
+  DESTINATION lib/${PROJECT_NAME}
 )
 
 # Dynamic IMU
@@ -143,11 +173,17 @@ ament_target_dependencies(${PROJECT_NAME}_imu
   pluginlib
   tf2_ros
 )
-add_dependencies(${PROJECT_NAME}_imu
-  compile-lib-vehicle
-)
 target_link_libraries(${PROJECT_NAME}_imu
   ${WEBOTS_LIB}
+)
+
+install(
+  DIRECTORY webots/include/c
+  DESTINATION include/webots
+)
+install(
+  DIRECTORY webots/include/cpp
+  DESTINATION include/webots
 )
 install(TARGETS ${PROJECT_NAME}_imu
   RUNTIME DESTINATION bin
@@ -155,39 +191,47 @@ install(TARGETS ${PROJECT_NAME}_imu
   LIBRARY DESTINATION lib
 )
 
-# libController
-install(
-  DIRECTORY webots/include/controller/c
-  DESTINATION include/webots
-)
-install(
-  DIRECTORY webots/include/controller/cpp
-  DESTINATION include/webots
-)
-install(
-  DIRECTORY ${WEBOTS_LIB_BASE}/
-  DESTINATION lib/controller
-  PATTERN "python*" EXCLUDE
-  PATTERN "matlab" EXCLUDE
-  PATTERN "*Controller*"
-  PATTERN "*CppController*"
-  PATTERN "*car*"
-  PATTERN "*CppCar*"
-  PATTERN "*driver*"
-  PATTERN "*CppDriver*"
-)
+if(MSVC OR MSYS OR MINGW OR WIN32)
+  # Windows requires the library to be placed with executable
+  install(
+    FILES "${WEBOTS_LIB_BASE}/${CMAKE_SHARED_LIBRARY_PREFIX}Controller${CMAKE_SHARED_LIBRARY_SUFFIX}"
+    DESTINATION lib/${PROJECT_NAME}
+  )
+  install(
+    FILES "${WEBOTS_LIB_BASE}/${CMAKE_SHARED_LIBRARY_PREFIX}car${CMAKE_SHARED_LIBRARY_SUFFIX}"
+    DESTINATION lib/${PROJECT_NAME}
+  )
+  install(
+    FILES "${WEBOTS_LIB_BASE}/${CMAKE_SHARED_LIBRARY_PREFIX}driver${CMAKE_SHARED_LIBRARY_SUFFIX}"
+    DESTINATION lib/${PROJECT_NAME}
+  )
 
-# Create symlinks of libController
-macro(lib_symlink filename)
-  install(CODE "execute_process(COMMAND ln -sf ${CMAKE_INSTALL_PREFIX}/lib/controller/${filename} ${CMAKE_INSTALL_PREFIX}/lib/${filename})")
-endmacro(lib_symlink)
-
-lib_symlink(libController.so)
-lib_symlink(libcar.so)
-lib_symlink(libCppCar.so)
-lib_symlink(libCppController.so)
-lib_symlink(libCppDriver.so)
-lib_symlink(libdriver.so)
+  # Windows requires the C++ library to be placed with the Python module
+  install(
+    FILES "${WEBOTS_LIB_BASE}/${CMAKE_SHARED_LIBRARY_PREFIX}CppController${CMAKE_SHARED_LIBRARY_SUFFIX}"
+    DESTINATION "${PYTHON_INSTALL_DIR}/${PROJECT_NAME}_webots/"
+  )
+  install(
+    FILES "${WEBOTS_LIB_BASE}/${CMAKE_SHARED_LIBRARY_PREFIX}CppCar${CMAKE_SHARED_LIBRARY_SUFFIX}"
+    DESTINATION "${PYTHON_INSTALL_DIR}/${PROJECT_NAME}_webots/"
+  )
+  install(
+    FILES "${WEBOTS_LIB_BASE}/${CMAKE_SHARED_LIBRARY_PREFIX}CppDriver${CMAKE_SHARED_LIBRARY_SUFFIX}"
+    DESTINATION "${PYTHON_INSTALL_DIR}/${PROJECT_NAME}_webots/"
+  )
+else()
+  install(
+    DIRECTORY ${WEBOTS_LIB_BASE}/
+    DESTINATION lib
+    PATTERN "python*" EXCLUDE
+    PATTERN "*Controller*"
+    PATTERN "*CppController*"
+    PATTERN "*car*"
+    PATTERN "*CppCar*"
+    PATTERN "*driver*"
+    PATTERN "*CppDriver*"
+  )
+endif()
 
 # Prevent pluginlib from using boost
 target_compile_definitions(driver PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
@@ -216,6 +260,7 @@ ament_export_dependencies(
   rclpy
   sensor_msgs
   std_msgs
+  tf2_geometry_msgs
   tf2_ros
   vision_msgs
   webots_ros2_msgs

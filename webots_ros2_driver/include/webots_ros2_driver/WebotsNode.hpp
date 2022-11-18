@@ -21,7 +21,8 @@
 
 #include <tinyxml2.h>
 
-#include <webots/supervisor.h>
+#include <webots/Node.hpp>
+#include <webots/Supervisor.hpp>
 
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp/qos.hpp>
@@ -37,9 +38,10 @@ namespace webots_ros2_driver
   class WebotsNode : public rclcpp::Node
   {
   public:
-    WebotsNode(std::string name);
+    WebotsNode(std::string name, webots::Supervisor *robot);
     void init();
     int step();
+    webots::Supervisor *robot() { return mRobot; }
     std::string urdf() const { return mRobotDescription; };
     static void handleSignals();
 
@@ -58,6 +60,7 @@ namespace webots_ros2_driver
 
     rclcpp::TimerBase::SharedPtr mTimer;
     int mStep;
+    webots::Supervisor *mRobot;
     std::vector<std::shared_ptr<PluginInterface>> mPlugins;
     pluginlib::ClassLoader<PluginInterface> mPluginLoader;
     tinyxml2::XMLElement *mWebotsXMLElement;

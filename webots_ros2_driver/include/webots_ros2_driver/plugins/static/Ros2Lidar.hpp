@@ -16,7 +16,7 @@
 #define ROS2_LIDAR_HPP
 
 #include <unordered_map>
-#include <webots/lidar.h>
+#include <webots/Lidar.hpp>
 #include <sensor_msgs/msg/laser_scan.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <webots_ros2_driver/plugins/Ros2SensorPlugin.hpp>
@@ -36,7 +36,7 @@ namespace webots_ros2_driver
     void publishPointCloud();
     void publishLaserScan();
 
-    WbDeviceTag mLidar;
+    webots::Lidar *mLidar;
 
     rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr mLaserPublisher;
     sensor_msgs::msg::LaserScan mLaserMessage;

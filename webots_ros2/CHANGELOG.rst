@@ -2,6 +2,12 @@
 Changelog for package webots_ros2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2022.1.4 (2022-11-18)
+------------------
+* Fix the camera focal length in the CameraInfo topic.
+* Upgraded to urdf2webots 2.0.3
+* Update the calculation of CameraRecognitionObject messages to the RDF convention of R2022b.
+
 2022.1.3 (2022-11-02)
 ------------------
 * Added macOS support.

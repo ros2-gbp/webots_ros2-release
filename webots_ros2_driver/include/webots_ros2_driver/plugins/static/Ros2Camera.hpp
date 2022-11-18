@@ -17,10 +17,12 @@
 
 #include <unordered_map>
 
-#include <webots/camera.h>
+#include <webots/Camera.hpp>
 
 #include <geometry_msgs/msg/quaternion.hpp>
 #include <geometry_msgs/msg/point.hpp>
+#include <geometry_msgs/msg/transform_stamped.hpp>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <sensor_msgs/image_encodings.hpp>
 #include <sensor_msgs/msg/camera_info.hpp>
 #include <sensor_msgs/msg/image.hpp>
@@ -49,7 +51,7 @@ namespace webots_ros2_driver
     void publishImage();
     void publishRecognition();
 
-    WbDeviceTag mCamera;
+    webots::Camera* mCamera;
 
     rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr mImagePublisher;
     sensor_msgs::msg::Image mImageMessage;

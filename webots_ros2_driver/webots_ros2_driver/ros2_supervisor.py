@@ -22,8 +22,7 @@ import os
 import sys
 
 import rclpy
-import vehicle
-import controller
+import webots_ros2_driver_webots
 import webots_ros2_importer
 from rclpy.time import Time
 from rclpy.node import Node
@@ -35,9 +34,8 @@ from urdf2webots.importer import convertUrdfFile, convertUrdfContent
 from webots_ros2_msgs.srv import SpawnUrdfRobot
 
 # As Ros2Supervisor needs the controller library, we extend the path here
-# to avoid to load another library named "controller" or "vehicle".
-sys.path.insert(1, os.path.dirname(vehicle.__file__))
-sys.path.insert(1, os.path.dirname(controller.__file__))
+# to avoid to load another library named "controller".
+sys.path.insert(1, os.path.dirname(webots_ros2_driver_webots.__file__))
 from controller import Supervisor
 
 

@@ -33,8 +33,8 @@
 #include "webots_ros2_driver/WebotsNode.hpp"
 
 #include "webots_ros2_control/Ros2ControlSystemInterface.hpp"
-#include "webots/motor.h"
-#include "webots/position_sensor.h"
+#include "webots/Motor.hpp"
+#include "webots/PositionSensor.hpp"
 
 namespace webots_ros2_control
 {
@@ -49,8 +49,8 @@ namespace webots_ros2_control
     bool controlVelocity;
     bool controlEffort;
     std::string name;
-    WbDeviceTag motor;
-    WbDeviceTag sensor;
+    webots::Motor* motor;
+    webots::PositionSensor* sensor;
   };
 
   class Ros2ControlSystem : public Ros2ControlSystemInterface

@@ -14,8 +14,6 @@
 
 #include <webots_ros2_driver/plugins/static/Ros2GPS.hpp>
 
-#include <webots/robot.h>
-
 namespace webots_ros2_driver
 {
 
@@ -23,11 +21,11 @@ namespace webots_ros2_driver
   {
     Ros2SensorPlugin::init(node, parameters);
     mIsEnabled = false;
-    mGPS = wb_robot_get_device(parameters["name"].c_str());
+    mGPS = mNode->robot()->getGPS(parameters["name"]);
 
-    assert(mGPS != 0);
+    assert(mGPS != NULL);
 
-    if (wb_gps_get_coordinate_system(mGPS) == WB_GPS_WGS84_COORDINATE)
+    if (mGPS->getCoordinateSystem() == webots::GPS::WGS84)
     {
       mGPSPublisher = mNode->create_publisher<sensor_msgs::msg::NavSatFix>(mTopicName, rclcpp::SensorDataQoS().reliable());
       mGPSMessage.header.frame_id = mFrameName;
@@ -43,7 +41,7 @@ namespace webots_ros2_driver
     mSpeedVectorPublisher = mNode->create_publisher<geometry_msgs::msg::Vector3>(mTopicName + "/speed_vector", rclcpp::SensorDataQoS().reliable());
 
     if (mAlwaysOn) {
-      wb_gps_enable(mGPS, mPublishTimestepSyncedMs);
+      mGPS->enable(mPublishTimestepSyncedMs);
       mIsEnabled = true;
     }
   }
@@ -78,9 +76,9 @@ namespace webots_ros2_driver
     if (shouldBeEnabled != mIsEnabled)
     {
       if (shouldBeEnabled)
-        wb_gps_enable(mGPS, mPublishTimestepSyncedMs);
+        mGPS->enable(mPublishTimestepSyncedMs);
       else
-        wb_gps_disable(mGPS);
+        mGPS->disable();
       mIsEnabled = shouldBeEnabled;
     }
   }
@@ -88,7 +86,7 @@ namespace webots_ros2_driver
   void Ros2GPS::publishPoint()
   {
     mPointMessage.header.stamp = mNode->get_clock()->now();
-    const double *values = wb_gps_get_values(mGPS);
+    const double *values = mGPS->getValues();
     mPointMessage.point.x = values[0];
     mPointMessage.point.y = values[1];
     mPointMessage.point.z = values[2];
@@ -98,7 +96,7 @@ namespace webots_ros2_driver
   void Ros2GPS::publishGPS()
   {
     mGPSMessage.header.stamp = mNode->get_clock()->now();
-    const double *values = wb_gps_get_values(mGPS);
+    const double *values = mGPS->getValues();
     mGPSMessage.latitude = values[0];
     mGPSMessage.longitude = values[1];
     mGPSMessage.altitude = values[2];
@@ -107,13 +105,13 @@ namespace webots_ros2_driver
 
   void Ros2GPS::publishSpeed()
   {
-    mSpeedMessage.data = wb_gps_get_speed(mGPS);
+    mSpeedMessage.data = mGPS->getSpeed();
     mSpeedPublisher->publish(mSpeedMessage);
   }
 
   void Ros2GPS::publishSpeedVector()
   {
-    const double *values = wb_gps_get_speed_vector(mGPS);
+    const double *values = mGPS->getSpeedVector();
     mSpeedVectorMessage.x = values[0];
     mSpeedVectorMessage.y = values[1];
     mSpeedVectorMessage.z = values[2];

@@ -1,0 +1,43 @@
+ros-rolling-webots-ros2-importer (2022.1.4-1bullseye) bullseye; urgency=high
+
+  * Upgraded to urdf2webots 2.0.3
+
+ -- Cyberbotics <support@cyberbotics.com>  Thu, 17 Nov 2022 23:00:00 -0000
+
+ros-rolling-webots-ros2-importer (2022.1.1-1bullseye) bullseye; urgency=high
+
+  * Upgraded to urdf2webots 2.0.2
+
+ -- Cyberbotics <support@cyberbotics.com>  Mon, 10 Oct 2022 22:00:00 -0000
+
+ros-rolling-webots-ros2-importer (2022.1.0-1bullseye) bullseye; urgency=high
+
+  * Upgraded to urdf2webots 2.0.0
+
+ -- Cyberbotics <support@cyberbotics.com>  Thu, 22 Sep 2022 22:00:00 -0000
+
+ros-rolling-webots-ros2-importer (1.2.3-1bullseye) bullseye; urgency=high
+
+  * Upgraded to urdf2webots 1.0.18
+
+ -- Cyberbotics <support@cyberbotics.com>  Sun, 29 May 2022 22:00:00 -0000
+
+ros-rolling-webots-ros2-importer (1.1.0-1bullseye) bullseye; urgency=high
+
+  * Upgraded to urdf2webots 1.0.10
+
+ -- Cyberbotics <support@cyberbotics.com>  Sun, 18 Jul 2021 22:00:00 -0000
+
+ros-rolling-webots-ros2-importer (1.0.0-1bullseye) bullseye; urgency=high
+
+  * Added the '--multi-file', '--static-base', '--tool-slot' and '--rotation' arguments.
+
+ -- Cyberbotics <support@cyberbotics.com>  Mon, 31 Aug 2020 22:00:00 -0000
+
+ros-rolling-webots-ros2-importer (0.0.3-1bullseye) bullseye; urgency=high
+
+  * Initial version
+
+ -- Cyberbotics <support@cyberbotics.com>  Sun, 14 Jun 2020 22:00:00 -0000
+
+

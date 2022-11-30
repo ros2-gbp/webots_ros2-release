@@ -124,11 +124,11 @@ tracks:
     patches: null
     release_inc: '2'
     release_repo_url: null
-    release_tag: 2022.1.4
+    release_tag: 2023.0.0
     ros_distro: humble
     vcs_type: git
     vcs_uri: https://github.com/cyberbotics/webots_ros2.git
-    version: 2022.1.4
+    version: 2023.0.0
   rolling:
     actions:
     - bloom-export-upstream :{vcs_local_uri} :{vcs_type} --tag :{release_tag} --display-uri

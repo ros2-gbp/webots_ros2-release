@@ -1,0 +1,12 @@
+Source: ros-foxy-webots-ros2-universal-robot
+Section: misc
+Priority: optional
+Maintainer: Cyberbotics <support@cyberbotics.com>
+Build-Depends: debhelper (>= 9.0.0), python3-pytest <!nocheck>, ros-foxy-ament-copyright <!nocheck>, ros-foxy-ament-flake8 <!nocheck>, ros-foxy-ament-pep257 <!nocheck>, ros-foxy-ros-workspace, python3-all, python3-setuptools, dh-python
+Homepage: http://wiki.ros.org/webots_ros2
+Standards-Version: 3.9.2
+
+Package: ros-foxy-webots-ros2-universal-robot
+Architecture: any
+Depends: ${python3:Depends}, ${misc:Depends}, ros-foxy-builtin-interfaces, ros-foxy-control-msgs, ros-foxy-controller-manager, ros-foxy-joint-state-broadcaster, ros-foxy-joint-trajectory-controller, ros-foxy-rclpy, ros-foxy-robot-state-publisher, ros-foxy-rviz2, ros-foxy-trajectory-msgs, ros-foxy-webots-ros2-control, ros-foxy-webots-ros2-driver, ros-foxy-xacro, ros-foxy-ros-workspace
+Description: Universal Robot ROS2 interface for Webots.

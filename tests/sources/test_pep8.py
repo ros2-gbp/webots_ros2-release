@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 # Copyright 1996-2023 Cyberbotics Ltd.
 #
@@ -22,14 +22,16 @@ import fnmatch
 import pycodestyle
 import os
 import sys
+from io import open  # needed for compatibility with Python 2.7 for open(file, encoding='utf-8')
 
 from pyflakes import checker
 from pyflakes.reporter import Reporter
 
-ROOT_FOLDER = os.path.dirname(os.path.dirname(__file__))
+ROOT_FOLDER = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 skippedDirectories = [
     '.git',
-    'tests/sources/motoman/motoman_driver/'
+    'webots_ros2_importer/webots_ros2_importer/urdf2webots/',
+    'webots_ros2_driver/webots/lib'
 ]
 skippedDirectoriesFull = [os.path.join(ROOT_FOLDER, os.path.normpath(path)) for path in skippedDirectories]
 
@@ -139,7 +141,7 @@ class TestCodeFormat(unittest.TestCase):
     """Unit test of the PEP8 format in the tests."""
 
     def setUp(self):
-        """Get all python files."""
+        """Get all the python files."""
         self.files = []
         for rootPath, dirNames, fileNames in os.walk(ROOT_FOLDER):
             for fileName in fnmatch.filter(fileNames, '*.py'):

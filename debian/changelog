@@ -1,0 +1,32 @@
+ros-rolling-webots-ros2-tiago (2023.0.2-2bullseye) bullseye; urgency=high
+
+  * Updated supervisor launch.
+
+ -- Cyberbotics <support@cyberbotics.com>  Tue, 07 Feb 2023 08:00:00 -0000
+
+ros-rolling-webots-ros2-tiago (2022.1.3-2bullseye) bullseye; urgency=high
+
+  * Added macOS support.
+  * Added reset handler to support simulation reset from Webots.
+
+ -- Cyberbotics <support@cyberbotics.com>  Wed, 02 Nov 2022 07:00:00 -0000
+
+ros-rolling-webots-ros2-tiago (2022.1.2-2bullseye) bullseye; urgency=high
+
+  * Added WSL support.
+
+ -- Cyberbotics <support@cyberbotics.com>  Fri, 21 Oct 2022 07:00:00 -0000
+
+ros-rolling-webots-ros2-tiago (1.2.0-2bullseye) bullseye; urgency=high
+
+  * Adapt the worlds to the new R2022a FLU convention.
+
+ -- Cyberbotics <support@cyberbotics.com>  Tue, 21 Dec 2021 08:00:00 -0000
+
+ros-rolling-webots-ros2-tiago (1.1.2-2bullseye) bullseye; urgency=high
+
+  * Initial version (package replaced).
+
+ -- Cyberbotics <support@cyberbotics.com>  Wed, 03 Nov 2021 07:00:00 -0000
+
+

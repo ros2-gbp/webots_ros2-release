@@ -11,7 +11,8 @@ data_files.append(('share/' + package_name + '/resource', [
     'resource/turtlebot3_burger_example_map.pgm',
     'resource/turtlebot3_burger_example_map.yaml',
     'resource/turtlebot_webots.urdf',
-    'resource/ros2control.yml'
+    'resource/ros2control.yml',
+    'resource/nav2_params.yaml'
 ]))
 
 data_files.append(('share/' + package_name + '/worlds', [
@@ -22,7 +23,7 @@ data_files.append(('share/' + package_name, ['package.xml']))
 
 setup(
     name=package_name,
-    version='2023.0.2',
+    version='2023.0.3',
     packages=[package_name],
     data_files=data_files,
     install_requires=['setuptools', 'launch'],

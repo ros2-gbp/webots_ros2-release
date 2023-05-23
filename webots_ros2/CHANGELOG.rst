@@ -2,6 +2,15 @@
 Changelog for package webots_ros2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2023.0.4 (2023-05-23)
+------------------
+* Drop support for Foxy.
+* Fixed vertical field of view in static RangeFinder plugin.
+* Added support for painted point clouds
+* Fixed ability to launch RViz without other tools in e-puck example.
+* Fixed command line arguments in importer tools.
+* Added custom handler in driver interface to start nodes when Webots is ready.
+
 2023.0.3 (2023-04-12)
 ------------------
 * Fixed the calibration of the TIAGo.

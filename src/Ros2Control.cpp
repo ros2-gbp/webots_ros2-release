@@ -34,31 +34,21 @@ const double CONTROLLER_MANAGER_ALLOWED_SAMPLE_ERROR_MS = 1.0;
 
 namespace webots_ros2_control {
 
-  Ros2Control::Ros2Control() { mNode = NULL; }
+  Ros2Control::Ros2Control() {
+    mNode = NULL;
+  }
 
   void Ros2Control::step() {
     const int nowMs = wb_robot_get_time() * 1000.0;
     const int periodMs = nowMs - mLastControlUpdateMs;
     if (periodMs >= mControlPeriodMs) {
-#if FOXY
-      mControllerManager->read();
-#else
       const rclcpp::Duration dt = rclcpp::Duration::from_seconds(mControlPeriodMs / 1000.0);
       mControllerManager->read(mNode->get_clock()->now(), dt);
-#endif
 
-#if FOXY
-      mControllerManager->update();
-#else
       mControllerManager->update(mNode->get_clock()->now(), dt);
       mLastControlUpdateMs = nowMs;
-#endif
 
-#if FOXY
-      mControllerManager->write();
-#else  // HUMBLE, ROLLING
       mControllerManager->write(mNode->get_clock()->now(), dt);
-#endif
     }
   }
   void Ros2Control::init(webots_ros2_driver::WebotsNode *node, std::unordered_map<std::string, std::string> &) {
@@ -96,15 +86,9 @@ namespace webots_ros2_control {
         mHardwareLoader->createUnmanagedInstance(hardwareType));
 #endif
       webotsSystem->init(mNode, controlHardware[i]);
-#if FOXY
-      resourceManager->import_component(std::move(webotsSystem));
-#else
       resourceManager->import_component(std::move(webotsSystem), controlHardware[i]);
-#endif
 
-#if HUMBLE || ROLLING
       resourceManager->activate_all_components();
-#endif
     }
 
     // Controller Manager

@@ -29,11 +29,7 @@ int main(int argc, char **argv) {
   webots_ros2_driver::WebotsNode::handleSignals();
 
   rclcpp::InitOptions options{};
-#if FOXY
-  options.shutdown_on_sigint = false;
-#else
   options.shutdown_on_signal = false;
-#endif
   rclcpp::init(argc, argv, options);
 
   std::string robotName(wb_robot_get_name());
@@ -42,6 +38,7 @@ int main(int argc, char **argv) {
 
   std::shared_ptr<webots_ros2_driver::WebotsNode> node = std::make_shared<webots_ros2_driver::WebotsNode>(robotName);
   node->init();
+  RCLCPP_INFO(node->get_logger(), "Controller successfully connected to robot in Webots simulation.");
   while (true) {
     if (node->step() == -1)
       break;

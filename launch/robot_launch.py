@@ -27,6 +27,7 @@ from launch import LaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from ament_index_python.packages import get_package_share_directory
 from webots_ros2_driver.webots_launcher import WebotsLauncher
+from webots_ros2_driver.wait_for_controller_connection import WaitForControllerConnection
 from webots_ros2_driver.utils import controller_url_prefix
 
 
@@ -40,14 +41,13 @@ def get_ros2_nodes(*args):
     robot_description = pathlib.Path(os.path.join(package_dir, 'resource', 'epuck_webots.urdf')).read_text()
     ros2_control_params = os.path.join(package_dir, 'resource', 'ros2_control.yml')
     use_sim_time = LaunchConfiguration('use_sim_time', default=True)
+
+    # ROS control spawners
     controller_manager_timeout = ['--controller-manager-timeout', '50']
     controller_manager_prefix = 'python.exe' if os.name == 'nt' else ''
-
-    use_deprecated_spawner_py = 'ROS_DISTRO' in os.environ and os.environ['ROS_DISTRO'] == 'foxy'
-
     diffdrive_controller_spawner = Node(
         package='controller_manager',
-        executable='spawner' if not use_deprecated_spawner_py else 'spawner.py',
+        executable='spawner',
         output='screen',
         prefix=controller_manager_prefix,
         arguments=['diffdrive_controller'] + controller_manager_timeout,
@@ -55,10 +55,9 @@ def get_ros2_nodes(*args):
             {'use_sim_time': use_sim_time},
         ],
     )
-
     joint_state_broadcaster_spawner = Node(
         package='controller_manager',
-        executable='spawner' if not use_deprecated_spawner_py else 'spawner.py',
+        executable='spawner',
         output='screen',
         prefix=controller_manager_prefix,
         arguments=['joint_state_broadcaster'] + controller_manager_timeout,
@@ -66,6 +65,7 @@ def get_ros2_nodes(*args):
             {'use_sim_time': use_sim_time},
         ],
     )
+    ros_control_spawners = [diffdrive_controller_spawner, joint_state_broadcaster_spawner]
 
     mappings = [('/diffdrive_controller/cmd_vel_unstamped', '/cmd_vel')]
     if 'ROS_DISTRO' in os.environ and os.environ['ROS_DISTRO'] in ['humble', 'rolling']:
@@ -110,53 +110,33 @@ def get_ros2_nodes(*args):
         arguments=['0', '0', '0', '0', '0', '0', 'base_link', 'base_footprint'],
     )
 
-    tool_nodes = []
-    # Navigation
-    nav_tools = IncludeLaunchDescription(
+    # Tools
+    tool_nodes = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(package_dir, 'launch', 'robot_tools_launch.py')
         ),
         launch_arguments={
+            'fill_map': fill_map,
+            'mapper': use_mapper,
+            'map': map_filename,
             'nav': use_nav,
             'rviz': use_rviz,
             'use_sim_time': use_sim_time,
-            'map': map_filename,
         }.items(),
-        condition=launch.conditions.IfCondition(use_nav)
     )
-    tool_nodes.append(nav_tools)
 
-    # Mapping
-    mapper_tools = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(package_dir, 'launch', 'robot_tools_launch.py')
-        ),
-        launch_arguments={
-            'rviz': use_rviz,
-            'mapper': use_mapper,
-            'use_sim_time': use_sim_time,
-            'fill_map': fill_map,
-        }.items(),
-        condition=launch.conditions.IfCondition(use_mapper)
-    )
-    tool_nodes.append(mapper_tools)
-
-    # Wait for the simulation to be ready to start the tools
-    tools_handler = launch.actions.RegisterEventHandler(
-        event_handler=launch.event_handlers.OnProcessExit(
-            target_action=diffdrive_controller_spawner,
-            on_exit=tool_nodes
-        )
+    # Wait for the simulation to be ready to start the tools and spawners
+    waiting_nodes = WaitForControllerConnection(
+        target_driver=epuck_driver,
+        nodes_to_start=[tool_nodes] + ros_control_spawners
     )
 
     return [
-        joint_state_broadcaster_spawner,
-        diffdrive_controller_spawner,
         robot_state_publisher,
         epuck_driver,
         footprint_publisher,
         epuck_process,
-        tools_handler,
+        waiting_nodes,
     ]
 
 

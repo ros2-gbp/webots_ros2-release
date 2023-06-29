@@ -23,13 +23,16 @@ find_package(std_msgs REQUIRED)
 find_package(vision_msgs REQUIRED)
 
 set(msg_files
+  "msg/BoolStamped.msg"
   "msg/FloatStamped.msg"
   "msg/StringStamped.msg"
   "msg/CameraRecognitionObject.msg"
   "msg/CameraRecognitionObjects.msg"
   "msg/UrdfRobot.msg"
+  "msg/PenInkProperties.msg"
 )
 set(srv_files
+  "srv/GetBool.srv"
   "srv/EmitterSendString.srv"
   "srv/SpawnUrdfRobot.srv"
   "srv/SpawnNodeFromString.srv"

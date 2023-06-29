@@ -27,6 +27,7 @@ data_files.append(('share/' + package_name + '/protos', [
 data_files.append(('share/' + package_name + '/resource', [
     'resource/all.rviz',
     'resource/nav2_params.yaml',
+    'resource/nav2_params_iron.yaml',
     'resource/map_rats_life.pgm',
     'resource/map_rats_life.yaml',
     'resource/nav2_rats_life_waypoints.yaml',
@@ -42,7 +43,7 @@ data_files.append(('share/' + package_name, [
 
 setup(
     name=package_name,
-    version='2023.0.4',
+    version='2023.1.0',
     packages=[package_name],
     data_files=data_files,
     install_requires=['setuptools', 'launch'],

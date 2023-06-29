@@ -17,35 +17,14 @@
 """Launch Webots Mavic 2 Pro driver."""
 
 import os
-import pathlib
 import launch
 from launch.substitutions import LaunchConfiguration
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions.path_join_substitution import PathJoinSubstitution
-from launch_ros.actions import Node
 from launch import LaunchDescription
 from ament_index_python.packages import get_package_share_directory
 from webots_ros2_driver.webots_launcher import WebotsLauncher
-from webots_ros2_driver.utils import controller_url_prefix
-
-
-def get_ros2_nodes(*args):
-    package_dir = get_package_share_directory('webots_ros2_mavic')
-    robot_description = pathlib.Path(os.path.join(package_dir, 'resource', 'mavic_webots.urdf')).read_text()
-
-    mavic_driver = Node(
-        package='webots_ros2_driver',
-        executable='driver',
-        output='screen',
-        additional_env={'WEBOTS_CONTROLLER_URL': controller_url_prefix() + 'Mavic_2_PRO'},
-        parameters=[
-            {'robot_description': robot_description},
-        ]
-    )
-
-    return [
-        mavic_driver,
-    ]
+from webots_ros2_driver.webots_controller import WebotsController
 
 
 def generate_launch_description():
@@ -57,13 +36,13 @@ def generate_launch_description():
         ros2_supervisor=True
     )
 
-    # The following line is important!
-    # This event handler respawns the ROS 2 nodes on simulation reset (supervisor process ends).
-    reset_handler = launch.actions.RegisterEventHandler(
-        event_handler=launch.event_handlers.OnProcessExit(
-            target_action=webots._supervisor,
-            on_exit=get_ros2_nodes,
-        )
+    robot_description_path = os.path.join(package_dir, 'resource', 'mavic_webots.urdf')
+    mavic_driver = WebotsController(
+        robot_name='Mavic_2_PRO',
+        parameters=[
+            {'robot_description': robot_description_path},
+        ],
+        respawn=True
     )
 
     return LaunchDescription([
@@ -74,20 +53,15 @@ def generate_launch_description():
         ),
         webots,
         webots._supervisor,
+        mavic_driver,
 
         # This action will kill all nodes once the Webots simulation has exited
         launch.actions.RegisterEventHandler(
             event_handler=launch.event_handlers.OnProcessExit(
                 target_action=webots,
                 on_exit=[
-                    launch.actions.UnregisterEventHandler(
-                        event_handler=reset_handler.event_handler
-                    ),
                     launch.actions.EmitEvent(event=launch.events.Shutdown())
                 ],
             )
-        ),
-
-        # Add the reset event handler
-        reset_handler
-    ] + get_ros2_nodes())
+        )
+    ])

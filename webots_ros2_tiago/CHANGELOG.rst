@@ -2,6 +2,13 @@
 Changelog for package webots_ros2_tiago
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2023.1.0 (2023-06-29)
+------------------
+* Added support for Navigation2 in Iron.
+* Clean simulation reset in launch file.
+* Added new world, resources and launch file to start the TIAGo with real robot configuration.
+* Update driver node to new WebotsController node.
+
 2023.0.4 (2023-05-23)
 ------------------
 * Start ros control and navigation nodes when Webots is ready.

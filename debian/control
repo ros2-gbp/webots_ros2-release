@@ -1,0 +1,12 @@
+Source: ros-iron-webots-ros2-tiago
+Section: misc
+Priority: optional
+Maintainer: Cyberbotics <support@cyberbotics.com>
+Build-Depends: debhelper (>= 9.0.0), python3-pytest <!nocheck>, ros-iron-ament-copyright <!nocheck>, ros-iron-ros-workspace, python3-all, python3-setuptools, dh-python
+Homepage: http://wiki.ros.org/webots_ros2
+Standards-Version: 3.9.2
+
+Package: ros-iron-webots-ros2-tiago
+Architecture: any
+Depends: ${python3:Depends}, ${misc:Depends}, ros-iron-builtin-interfaces, ros-iron-controller-manager, ros-iron-diff-drive-controller, ros-iron-geometry-msgs, ros-iron-joint-state-broadcaster, ros-iron-rclpy, ros-iron-robot-state-publisher, ros-iron-rviz2, ros-iron-tf2-ros, ros-iron-webots-ros2-control, ros-iron-webots-ros2-driver, ros-iron-ros-workspace
+Description: TIAGo robots ROS2 interface for Webots.

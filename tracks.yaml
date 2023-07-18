@@ -122,7 +122,7 @@ tracks:
     last_version: 2023.1.1
     name: webots_ros2
     patches: null
-    release_inc: '1'
+    release_inc: '2'
     release_repo_url: null
     release_tag: 2023.1.1
     ros_distro: humble

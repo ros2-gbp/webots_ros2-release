@@ -1,0 +1,12 @@
+Source: ros-rolling-webots-ros2-epuck
+Section: misc
+Priority: optional
+Maintainer: Cyberbotics <support@cyberbotics.com>
+Build-Depends: debhelper (>= 9.0.0), python3-ament-copyright <!nocheck>, python3-pytest <!nocheck>, ros-rolling-ros-workspace, python3-all, python3-setuptools, dh-python
+Homepage: http://wiki.ros.org/webots_ros2
+Standards-Version: 3.9.2
+
+Package: ros-rolling-webots-ros2-epuck
+Architecture: any
+Depends: ${python3:Depends}, ${misc:Depends}, libgeometry-msgs-dev, libnav-msgs-dev, librobot-state-publisher-dev, libsensor-msgs-dev, libstd-msgs-dev, libtf2-ros-dev, python3-geometry-msgs, python3-nav-msgs, python3-sensor-msgs, python3-std-msgs, python3-tf2-ros, ros-geometry-msgs, ros-nav-msgs, ros-robot-state-publisher, ros-rolling-builtin-interfaces, ros-rolling-controller-manager, ros-rolling-diff-drive-controller, ros-rolling-joint-state-broadcaster, ros-rolling-rclpy, ros-rolling-rviz2, ros-rolling-webots-ros2-control, ros-rolling-webots-ros2-driver, ros-rolling-webots-ros2-msgs, ros-sensor-msgs, ros-std-msgs, ros-rolling-ros-workspace
+Description: E-puck2 driver for Webots simulated robot

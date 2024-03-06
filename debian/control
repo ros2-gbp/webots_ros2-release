@@ -1,0 +1,12 @@
+Source: ros-rolling-webots-ros2-control
+Section: misc
+Priority: optional
+Maintainer: Cyberbotics <support@cyberbotics.com>
+Build-Depends: debhelper (>= 9.0.0), ament-cmake, ament-cmake-copyright <!nocheck>, ament-cmake-cppcheck <!nocheck>, ament-cmake-cpplint <!nocheck>, ament-cmake-flake8 <!nocheck>, ament-cmake-lint-cmake <!nocheck>, ament-cmake-pep257 <!nocheck>, ament-cmake-uncrustify <!nocheck>, ament-cmake-xmllint <!nocheck>, ament-lint <!nocheck>, pluginlib-dev, ros-environment, ros-rolling-controller-manager, ros-rolling-hardware-interface, ros-rolling-rclcpp, ros-rolling-rclcpp-lifecycle, ros-rolling-webots-ros2-driver, ros-rolling-ros-workspace
+Homepage: http://wiki.ros.org/webots_ros2
+Standards-Version: 3.9.2
+
+Package: ros-rolling-webots-ros2-control
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, pluginlib-dev, ros-rolling-controller-manager, ros-rolling-hardware-interface, ros-rolling-rclcpp, ros-rolling-rclcpp-lifecycle, ros-rolling-webots-ros2-driver, ros-rolling-ros-workspace
+Description: ros2_control plugin for Webots

@@ -178,8 +178,8 @@ tracks:
     patches: null
     release_inc: '3'
     release_repo_url: null
-    release_tag: 2023.1.1
+    release_tag: 2023.1.2
     ros_distro: rolling
     vcs_type: git
     vcs_uri: https://github.com/cyberbotics/webots_ros2.git
-    version: 2023.1.1
+    version: 2023.1.2

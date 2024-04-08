@@ -1,0 +1,12 @@
+Source: ros-iron-webots-ros2-tesla
+Section: misc
+Priority: optional
+Maintainer: Cyberbotics <support@cyberbotics.com>
+Build-Depends: debhelper (>= 9.0.0), python3-pytest <!nocheck>, ros-iron-ament-copyright <!nocheck>, ros-iron-ros-workspace, python3-all, python3-setuptools, dh-python
+Homepage: http://wiki.ros.org/webots_ros2
+Standards-Version: 3.9.2
+
+Package: ros-iron-webots-ros2-tesla
+Architecture: any
+Depends: ${python3:Depends}, ${misc:Depends}, python3-numpy, python3-opencv, ros-iron-ackermann-msgs, ros-iron-builtin-interfaces, ros-iron-rclpy, ros-iron-webots-ros2-driver, ros-iron-ros-workspace
+Description: Tesla ROS2 interface for Webots.

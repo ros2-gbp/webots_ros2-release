@@ -1,0 +1,12 @@
+Source: ros-humble-webots-ros2-driver
+Section: misc
+Priority: optional
+Maintainer: Cyberbotics <support@cyberbotics.com>
+Build-Depends: debhelper (>= 9.0.0), libyaml-cpp-dev, ros-humble-ament-cmake, ros-humble-ament-cmake-python, ros-humble-ament-lint-auto <!nocheck>, ros-humble-ament-lint-common <!nocheck>, ros-humble-geometry-msgs, ros-humble-pluginlib, ros-humble-python-cmake-module, ros-humble-rclcpp, ros-humble-rclpy, ros-humble-ros-environment, ros-humble-sensor-msgs, ros-humble-std-msgs, ros-humble-tf2-geometry-msgs, ros-humble-tf2-ros, ros-humble-tinyxml2-vendor, ros-humble-vision-msgs, ros-humble-webots-ros2-importer, ros-humble-webots-ros2-msgs, ros-humble-ros-workspace
+Homepage: http://wiki.ros.org/webots_ros2
+Standards-Version: 3.9.2
+
+Package: ros-humble-webots-ros2-driver
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libyaml-cpp-dev, ros-humble-geometry-msgs, ros-humble-pluginlib, ros-humble-rclcpp, ros-humble-rclpy, ros-humble-sensor-msgs, ros-humble-std-msgs, ros-humble-tf2-geometry-msgs, ros-humble-tf2-ros, ros-humble-tinyxml2-vendor, ros-humble-vision-msgs, ros-humble-webots-ros2-importer, ros-humble-webots-ros2-msgs, ros-humble-ros-workspace
+Description: Implementation of the Webots - ROS 2 interface

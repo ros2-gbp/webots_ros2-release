@@ -1,1 +1,1 @@
-{"base": "70660297", "parent": "debian/rolling/webots_ros2_importer", "previous": "05712095", "trim": "", "trimbase": ""}
+{"base": "7f18a689", "parent": "debian/jazzy/webots_ros2_importer", "previous": "0ac3eab1", "trim": "", "trimbase": ""}

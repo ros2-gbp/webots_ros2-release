@@ -1,1 +1,1 @@
-{"base": "59dea0f2", "parent": "debian/rolling/webots_ros2_turtlebot", "previous": "1b129aab", "trim": "", "trimbase": ""}
+{"base": "47ecec98", "parent": "debian/jazzy/webots_ros2_turtlebot", "previous": "8ba8295f", "trim": "", "trimbase": ""}

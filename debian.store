@@ -1,1 +1,1 @@
-{"base": "db10afce", "parent": "debian/rolling/webots_ros2_mavic", "previous": "a27ba4f1", "trim": "", "trimbase": ""}
+{"base": "98c8cbb55", "parent": "debian/rolling/webots_ros2_mavic", "previous": "230ec0a56", "trim": "", "trimbase": ""}

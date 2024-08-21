@@ -1,3 +1,38 @@
+## webots_ros2 (rolling) - 2023.1.3-1
+
+The packages in the `webots_ros2` repository were released into the `rolling` distro by running `/home/lukic/.local/bin/bloom-release -r rolling webots_ros2 --override-release-repository-url https://github.com/ros2-gbp/webots_ros2-release.git --edit` on `Wed, 21 Aug 2024 09:56:39 -0000`
+
+These packages were released:
+- `webots_ros2`
+- `webots_ros2_control`
+- `webots_ros2_driver`
+- `webots_ros2_epuck`
+- `webots_ros2_importer`
+- `webots_ros2_mavic`
+- `webots_ros2_msgs`
+- `webots_ros2_tesla`
+- `webots_ros2_tests`
+- `webots_ros2_tiago`
+- `webots_ros2_turtlebot`
+- `webots_ros2_universal_robot`
+
+Version of package(s) in repository `webots_ros2`:
+
+- upstream repository: https://github.com/cyberbotics/webots_ros2.git
+- release repository: https://github.com/ros2-gbp/webots_ros2-release.git
+- rosdistro version: `2023.1.2-1`
+- old version: `2023.1.2-1`
+- new version: `2023.1.3-1`
+
+Versions of tools used:
+
+- bloom version: `0.12.0`
+- catkin_pkg version: `1.0.0`
+- rosdep version: `0.24.0`
+- rosdistro version: `0.9.1`
+- vcstools version: `0.1.42`
+
+
 ## webots_ros2 (iron) - 2023.1.2-1
 
 The packages in the `webots_ros2` repository were released into the `iron` distro by running `/usr/bin/bloom-release -r iron webots_ros2 --override-release-repository-url https://github.com/ros2-gbp/webots_ros2-release.git --edit` on `Mon, 08 Apr 2024 15:49:21 -0000`

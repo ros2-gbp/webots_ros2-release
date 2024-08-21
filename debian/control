@@ -1,0 +1,12 @@
+Source: ros-jazzy-webots-ros2-tesla
+Section: misc
+Priority: optional
+Maintainer: Cyberbotics <support@cyberbotics.com>
+Build-Depends: debhelper (>= 9.0.0), python3-pytest <!nocheck>, ros-jazzy-ament-copyright <!nocheck>, ros-jazzy-ros-workspace, python3-all, python3-setuptools, dh-python
+Homepage: http://wiki.ros.org/webots_ros2
+Standards-Version: 3.9.2
+
+Package: ros-jazzy-webots-ros2-tesla
+Architecture: any
+Depends: ${python3:Depends}, ${misc:Depends}, python3-numpy, python3-opencv, ros-jazzy-ackermann-msgs, ros-jazzy-builtin-interfaces, ros-jazzy-rclpy, ros-jazzy-webots-ros2-driver, ros-jazzy-ros-workspace
+Description: Tesla ROS2 interface for Webots.

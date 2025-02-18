@@ -1,0 +1,12 @@
+Source: ros-humble-webots-ros2-husarion
+Section: misc
+Priority: optional
+Maintainer: Husarion <support@husarion.com>
+Build-Depends: debhelper (>= 9.0.0), ros-humble-ros-workspace, python3-all, python3-setuptools, dh-python
+Homepage: http://wiki.ros.org/webots_ros2
+Standards-Version: 3.9.2
+
+Package: ros-humble-webots-ros2-husarion
+Architecture: any
+Depends: ${python3:Depends}, ${misc:Depends}, ros-humble-controller-manager, ros-humble-diff-drive-controller, ros-humble-joint-state-broadcaster, ros-humble-laser-filters, ros-humble-robot-localization, ros-humble-robot-state-publisher, ros-humble-webots-ros2-control, ros-humble-webots-ros2-driver, ros-humble-ros-workspace
+Description: Husarion ROSbot 2R and XL robots ROS2 interface for Webots.

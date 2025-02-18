@@ -1,0 +1,12 @@
+Source: ros-humble-webots-ros2
+Section: misc
+Priority: optional
+Maintainer: Cyberbotics <support@cyberbotics.com>
+Build-Depends: debhelper (>= 9.0.0), python3-pytest <!nocheck>, ros-humble-ament-copyright <!nocheck>, ros-humble-webots-ros2-tests <!nocheck>, ros-humble-ros-workspace, python3-all, python3-setuptools, dh-python
+Homepage: http://wiki.ros.org/webots_ros2
+Standards-Version: 3.9.2
+
+Package: ros-humble-webots-ros2
+Architecture: any
+Depends: ${python3:Depends}, ${misc:Depends}, ros-humble-builtin-interfaces, ros-humble-rclpy, ros-humble-std-msgs, ros-humble-webots-ros2-control, ros-humble-webots-ros2-crazyflie, ros-humble-webots-ros2-driver, ros-humble-webots-ros2-epuck, ros-humble-webots-ros2-husarion, ros-humble-webots-ros2-importer, ros-humble-webots-ros2-mavic, ros-humble-webots-ros2-msgs, ros-humble-webots-ros2-tesla, ros-humble-webots-ros2-tiago, ros-humble-webots-ros2-turtlebot, ros-humble-webots-ros2-universal-robot, ros-humble-ros-workspace
+Description: Interface between Webots and ROS2

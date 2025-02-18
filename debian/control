@@ -1,0 +1,12 @@
+Source: ros-humble-webots-ros2-crazyflie
+Section: misc
+Priority: optional
+Maintainer: Kimberly McGuire (Bitcraze AB) <kimberly@bitcraze.io>
+Build-Depends: debhelper (>= 9.0.0), python3-pytest <!nocheck>, ros-humble-ament-copyright <!nocheck>, ros-humble-ament-flake8 <!nocheck>, ros-humble-ament-pep257 <!nocheck>, ros-humble-ros-workspace, python3-all, python3-setuptools, dh-python
+Homepage: 
+Standards-Version: 3.9.2
+
+Package: ros-humble-webots-ros2-crazyflie
+Architecture: any
+Depends: ${python3:Depends}, ${misc:Depends}, ros-humble-builtin-interfaces, ros-humble-rclpy, ros-humble-tf-transformations, ros-humble-webots-ros2-driver, ros-humble-ros-workspace
+Description: ROS2 package for Crazyflie webots simulator

@@ -1,0 +1,12 @@
+Source: ros-kilted-webots-ros2-epuck
+Section: misc
+Priority: optional
+Maintainer: Cyberbotics <support@cyberbotics.com>
+Build-Depends: debhelper (>= 9.0.0), python3-pytest <!nocheck>, ros-kilted-ament-copyright <!nocheck>, ros-kilted-ros-workspace, python3-all, python3-setuptools, dh-python
+Homepage: http://wiki.ros.org/webots_ros2
+Standards-Version: 3.9.2
+
+Package: ros-kilted-webots-ros2-epuck
+Architecture: any
+Depends: ${python3:Depends}, ${misc:Depends}, ros-kilted-builtin-interfaces, ros-kilted-controller-manager, ros-kilted-diff-drive-controller, ros-kilted-geometry-msgs, ros-kilted-joint-state-broadcaster, ros-kilted-nav-msgs, ros-kilted-rclpy, ros-kilted-robot-state-publisher, ros-kilted-rviz2, ros-kilted-sensor-msgs, ros-kilted-std-msgs, ros-kilted-tf2-ros, ros-kilted-webots-ros2-control, ros-kilted-webots-ros2-driver, ros-kilted-webots-ros2-msgs, ros-kilted-ros-workspace
+Description: E-puck2 driver for Webots simulated robot

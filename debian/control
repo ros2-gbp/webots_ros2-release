@@ -1,0 +1,12 @@
+Source: ros-kilted-webots-ros2-husarion
+Section: misc
+Priority: optional
+Maintainer: Husarion <support@husarion.com>
+Build-Depends: debhelper (>= 9.0.0), ros-kilted-ros-workspace, python3-all, python3-setuptools, dh-python
+Homepage: http://wiki.ros.org/webots_ros2
+Standards-Version: 3.9.2
+
+Package: ros-kilted-webots-ros2-husarion
+Architecture: any
+Depends: ${python3:Depends}, ${misc:Depends}, ros-kilted-controller-manager, ros-kilted-diff-drive-controller, ros-kilted-joint-state-broadcaster, ros-kilted-laser-filters, ros-kilted-robot-localization, ros-kilted-robot-state-publisher, ros-kilted-webots-ros2-control, ros-kilted-webots-ros2-driver, ros-kilted-ros-workspace
+Description: Husarion ROSbot 2R and XL robots ROS2 interface for Webots.

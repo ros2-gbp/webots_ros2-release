@@ -2,6 +2,11 @@
 Changelog for package webots_ros2_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2025.0.1 (2025-07-14)
+------------------
+* Replaces ament_target_dependencies with target_link_libraries.
+* Adds ROS Kilted Kaiju support.
+
 2023.1.3 (2024-08-07)
 ------------------
 * Make webots_ros2_driver scripts executable.

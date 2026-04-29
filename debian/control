@@ -1,0 +1,12 @@
+Source: ros-lyrical-webots-ros2-driver
+Section: misc
+Priority: optional
+Maintainer: Cyberbotics <support@cyberbotics.com>
+Build-Depends: debhelper (>= 9.0.0), libyaml-cpp-dev, ros-lyrical-ament-cmake, ros-lyrical-ament-cmake-python, ros-lyrical-ament-lint-auto <!nocheck>, ros-lyrical-ament-lint-common <!nocheck>, ros-lyrical-geometry-msgs, ros-lyrical-pluginlib, ros-lyrical-python-cmake-module, ros-lyrical-rclcpp, ros-lyrical-rclpy, ros-lyrical-ros-environment, ros-lyrical-sensor-msgs, ros-lyrical-std-msgs, ros-lyrical-tf2-geometry-msgs, ros-lyrical-tf2-ros, ros-lyrical-tinyxml2-vendor, ros-lyrical-vision-msgs, ros-lyrical-webots-ros2-importer, ros-lyrical-webots-ros2-msgs, ros-lyrical-ros-workspace
+Homepage: http://wiki.ros.org/webots_ros2
+Standards-Version: 3.9.2
+
+Package: ros-lyrical-webots-ros2-driver
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libyaml-cpp-dev, ros-lyrical-geometry-msgs, ros-lyrical-pluginlib, ros-lyrical-rclcpp, ros-lyrical-rclpy, ros-lyrical-sensor-msgs, ros-lyrical-std-msgs, ros-lyrical-tf2-geometry-msgs, ros-lyrical-tf2-ros, ros-lyrical-tinyxml2-vendor, ros-lyrical-vision-msgs, ros-lyrical-webots-ros2-importer, ros-lyrical-webots-ros2-msgs, ros-lyrical-ros-workspace
+Description: Implementation of the Webots - ROS 2 interface

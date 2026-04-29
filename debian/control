@@ -1,0 +1,12 @@
+Source: ros-lyrical-webots-ros2-husarion
+Section: misc
+Priority: optional
+Maintainer: Husarion <support@husarion.com>
+Build-Depends: debhelper (>= 9.0.0), ros-lyrical-ros-workspace, python3-all, python3-setuptools, dh-python
+Homepage: http://wiki.ros.org/webots_ros2
+Standards-Version: 3.9.2
+
+Package: ros-lyrical-webots-ros2-husarion
+Architecture: any
+Depends: ${python3:Depends}, ${misc:Depends}, ros-lyrical-controller-manager, ros-lyrical-diff-drive-controller, ros-lyrical-joint-state-broadcaster, ros-lyrical-laser-filters, ros-lyrical-robot-localization, ros-lyrical-robot-state-publisher, ros-lyrical-webots-ros2-control, ros-lyrical-webots-ros2-driver, ros-lyrical-ros-workspace
+Description: Husarion ROSbot 2R and XL robots ROS2 interface for Webots.

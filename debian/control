@@ -1,0 +1,12 @@
+Source: ros-lyrical-webots-ros2-epuck
+Section: misc
+Priority: optional
+Maintainer: Cyberbotics <support@cyberbotics.com>
+Build-Depends: debhelper (>= 9.0.0), python3-pytest <!nocheck>, ros-lyrical-ament-copyright <!nocheck>, ros-lyrical-ros-workspace, python3-all, python3-setuptools, dh-python
+Homepage: http://wiki.ros.org/webots_ros2
+Standards-Version: 3.9.2
+
+Package: ros-lyrical-webots-ros2-epuck
+Architecture: any
+Depends: ${python3:Depends}, ${misc:Depends}, ros-lyrical-builtin-interfaces, ros-lyrical-controller-manager, ros-lyrical-diff-drive-controller, ros-lyrical-geometry-msgs, ros-lyrical-joint-state-broadcaster, ros-lyrical-nav-msgs, ros-lyrical-rclpy, ros-lyrical-robot-state-publisher, ros-lyrical-rviz2, ros-lyrical-sensor-msgs, ros-lyrical-std-msgs, ros-lyrical-tf2-ros, ros-lyrical-webots-ros2-control, ros-lyrical-webots-ros2-driver, ros-lyrical-webots-ros2-msgs, ros-lyrical-ros-workspace
+Description: E-puck2 driver for Webots simulated robot

@@ -1,0 +1,12 @@
+Source: ros-lyrical-webots-ros2
+Section: misc
+Priority: optional
+Maintainer: Cyberbotics <support@cyberbotics.com>
+Build-Depends: debhelper (>= 9.0.0), python3-pytest <!nocheck>, ros-lyrical-ament-copyright <!nocheck>, ros-lyrical-webots-ros2-tests <!nocheck>, ros-lyrical-ros-workspace, python3-all, python3-setuptools, dh-python
+Homepage: http://wiki.ros.org/webots_ros2
+Standards-Version: 3.9.2
+
+Package: ros-lyrical-webots-ros2
+Architecture: any
+Depends: ${python3:Depends}, ${misc:Depends}, ros-lyrical-builtin-interfaces, ros-lyrical-rclpy, ros-lyrical-std-msgs, ros-lyrical-webots-ros2-control, ros-lyrical-webots-ros2-crazyflie, ros-lyrical-webots-ros2-driver, ros-lyrical-webots-ros2-epuck, ros-lyrical-webots-ros2-husarion, ros-lyrical-webots-ros2-importer, ros-lyrical-webots-ros2-mavic, ros-lyrical-webots-ros2-msgs, ros-lyrical-webots-ros2-tesla, ros-lyrical-webots-ros2-tiago, ros-lyrical-webots-ros2-turtlebot, ros-lyrical-webots-ros2-universal-robot, ros-lyrical-ros-workspace
+Description: Interface between Webots and ROS2
